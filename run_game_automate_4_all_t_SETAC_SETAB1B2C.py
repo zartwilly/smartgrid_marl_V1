@@ -81,7 +81,7 @@ if __name__ == "__main__":
         # ---- new constances simu_DDMM_HHMM --- **** debug *****
         date_hhmm = "DDMM_HHMM"
         t_periods = 3#4 #10 #4 #10 #30 #50 #30 #35 #55 #117 #15 #3
-        k_steps = 50 #250 #250 #100 #250 #5000 #2000 #50 #250
+        k_steps = 25 #250 #250 #100 #250 #5000 #2000 #50 #250
         NB_REPEAT_K_MAX= 10 #3 #15 #30
         learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
         fct_aux.N_DECIMALS = 8
@@ -143,6 +143,29 @@ if __name__ == "__main__":
         manual_debug = False #True
         Visualisation = True #False, True
        
+        
+    setX = ""
+    if set(dico_scenario.keys()) == {"scenario0", "scenario1", "scenario2"} \
+        or set(dico_scenario.keys()) == {"scenario0", "scenario1"} \
+        or set(dico_scenario.keys()) == {"scenario0", "scenario2"} :
+        setX = "setACsetAB1B2C"
+    elif set(dico_scenario.keys()) == {"scenario0"}:
+        setX = "setAC"
+    elif set(dico_scenario.keys()) == {"scenario1", "scenario2"} \
+        or set(dico_scenario.keys()) == {"scenario1"} \
+        or set(dico_scenario.keys()) == {"scenario2"}:
+        setX = "setAB1B2C"
+
+    gamma_Vxs = set(gamma_versions)
+    root_gamVersion = "gamma"
+    for gamma_version in gamma_Vxs:
+        root_gamVersion =  root_gamVersion + "_V"+str(gamma_version)
+    
+    "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C"
+    name_execution = root_gamVersion \
+                        + "_" + "T"+str(t_periods) \
+                        + "_" + "ksteps" + str(k_steps) \
+                        + "_" + setX 
        
     for scenario_name, gamma_version in it.product( list(dico_scenario.keys()), 
                                               gamma_versions):
@@ -172,7 +195,7 @@ if __name__ == "__main__":
     
         autoExeGame4T.execute_algos_used_Generated_instances(
                     arr_pl_M_T_vars_init, 
-                    name_dir = name_dir,
+                    name_dir = os.path.join(name_dir,name_execution),
                     date_hhmm = date_hhmm_new,
                     k_steps = k_steps,
                     NB_REPEAT_K_MAX = NB_REPEAT_K_MAX,
