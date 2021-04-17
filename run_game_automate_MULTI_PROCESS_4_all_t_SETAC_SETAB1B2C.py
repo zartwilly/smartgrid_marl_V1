@@ -248,7 +248,7 @@ if __name__ == "__main__":
     for gamma_version in gamma_Vxs:
         root_gamVersion =  root_gamVersion + "_V"+str(gamma_version)
     
-    "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C"
+    # "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C"
     name_execution = root_gamVersion \
                         + "_" + "T"+str(t_periods) \
                         + "_" + "ksteps" + str(k_steps) \
@@ -297,7 +297,7 @@ if __name__ == "__main__":
     subject = "Execution scenarios ."
     
     envoie_mail(message, subject)
-    # envoie_mail_with_pieces_jointes(message, subject, path_files)
+    #envoie_mail_with_pieces_jointes(message, subject, path_files)
     
     import pandas as pd
     d = {"running": time.time()-ti}
