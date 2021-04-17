@@ -658,6 +658,149 @@ def checkout_nash_4_profils_by_periods(arr_pl_M_T_vars_modif,
 ###############################################################################
 
 ###############################################################################
+#              compute prices B C BB CC RU ---> debut                
+###############################################################################
+def compute_prices_B_C_BB_CC_RU_DET(arr_pl_M_T_vars_modif, 
+                                    pi_sg_minus_T, pi_sg_plus_T, 
+                                    pi_0_minus_T, pi_0_plus_T,
+                                    b0_s_T, c0_s_T):
+    
+    m_players = arr_pl_M_T_vars_modif.shape[0]
+    t_periods = arr_pl_M_T_vars_modif.shape[1]
+    
+    B_is_M = np.empty(shape=(m_players, )); B_is_M.fill(np.nan)
+    C_is_M = np.empty(shape=(m_players, )); C_is_M.fill(np.nan)
+    BB_is_M = np.empty(shape=(m_players, )); BB_is_M.fill(np.nan)
+    CC_is_M = np.empty(shape=(m_players, )); CC_is_M.fill(np.nan)
+    RU_is_M = np.empty(shape=(m_players, )); RU_is_M.fill(np.nan)
+    
+    B_is_MT = np.empty(shape=(m_players, t_periods)); B_is_MT.fill(np.nan)
+    C_is_MT = np.empty(shape=(m_players, t_periods)); C_is_MT.fill(np.nan)
+    BB_is_MT = np.empty(shape=(m_players, t_periods)); BB_is_MT.fill(np.nan)
+    CC_is_MT = np.empty(shape=(m_players, t_periods)); CC_is_MT.fill(np.nan)
+    RU_is_MT = np.empty(shape=(m_players, t_periods)); RU_is_MT.fill(np.nan)
+    
+    PROD_is_MT = np.empty(shape=(m_players, t_periods)); PROD_is_MT.fill(np.nan)
+    CONS_is_MT = np.empty(shape=(m_players, t_periods)); CONS_is_MT.fill(np.nan)
+    for t in range(0, t_periods):
+        prod_is_Mt = arr_pl_M_T_vars_modif[:, t, AUTOMATE_INDEX_ATTRS["prod_i"]]
+        cons_is_Mt = arr_pl_M_T_vars_modif[:, t, AUTOMATE_INDEX_ATTRS["cons_i"]]
+        b0_t = b0_s_T[t]; c0_t = c0_s_T[t]
+        B_is_Mt = b0_t * prod_is_Mt
+        C_is_Mt = c0_t * cons_is_Mt
+        if t == 0:
+            B_is_MT[:,t] = B_is_Mt
+            C_is_MT[:,t] = C_is_Mt
+            PROD_is_MT[:,t] = prod_is_Mt
+            CONS_is_MT[:,t] = cons_is_Mt
+        else:
+            B_is_MT[:,t] = np.sum(B_is_MT[:,:t],axis=1) + B_is_Mt
+            C_is_MT[:,t] = np.sum(C_is_MT[:,:t],axis=1) + C_is_Mt
+            PROD_is_MT[:,t] = np.sum(PROD_is_MT[:,:t], axis=1) + prod_is_Mt
+            CONS_is_MT[:,t] = np.sum(PROD_is_MT[:,:t], axis=1) + cons_is_Mt
+        CC_is_MT[:,t] = pi_sg_minus_T[t] * CONS_is_MT[:,t]
+        BB_is_MT[:,t] = pi_sg_plus_T[t] * PROD_is_MT[:,t]
+        RU_is_MT[:,t] = BB_is_MT[:,t] - CC_is_MT[:,t]
+        
+    B_is_M = np.sum(B_is_MT, axis=1)
+    C_is_M = np.sum(C_is_MT, axis=1)
+    BB_is_M = np.sum(BB_is_MT, axis=1)
+    CC_is_M = np.sum(CC_is_MT, axis=1)
+    RU_is_M = np.sum(RU_is_MT, axis=1)
+    
+    return B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M
+# _____             compute prices B C BB CC RU ---> fin                 _____
+
+# _____         checkout prices from computing variables ---> debut      _____
+def checkout_prices_4_computing_variables_DET(arr_pl_M_T_vars_modif, 
+                                          pi_sg_minus_T, pi_sg_plus_T, 
+                                          pi_0_minus_T, pi_0_plus_T,
+                                          b0_s_T, c0_s_T,
+                                          B_is_M, C_is_M ,
+                                          BB_is_M, CC_is_M, RU_is_M):
+    
+    m_players = arr_pl_M_T_vars_modif.shape[0]
+    t_periods = arr_pl_M_T_vars_modif.shape[1]
+    
+    B_M_cp = np.empty(shape=(m_players, )); B_M_cp.fill(np.nan)
+    C_M_cp = np.empty(shape=(m_players, )); C_M_cp.fill(np.nan)
+    BB_M_cp = np.empty(shape=(m_players, )); BB_M_cp.fill(np.nan)
+    CC_M_cp = np.empty(shape=(m_players, )); CC_M_cp.fill(np.nan)
+    RU_M_cp = np.empty(shape=(m_players, )); RU_M_cp.fill(np.nan)
+    
+    B_MT_cp = np.empty(shape=(m_players, t_periods)); B_MT_cp.fill(np.nan)
+    C_MT_cp = np.empty(shape=(m_players, t_periods)); C_MT_cp.fill(np.nan)
+    BB_MT_cp = np.empty(shape=(m_players, t_periods)); BB_MT_cp.fill(np.nan)
+    CC_MT_cp = np.empty(shape=(m_players, t_periods)); CC_MT_cp.fill(np.nan)
+    RU_MT_cp = np.empty(shape=(m_players, t_periods)); RU_MT_cp.fill(np.nan)
+    
+    PROD_MT = np.empty(shape=(m_players, t_periods)); PROD_MT.fill(np.nan)
+    CONS_MT = np.empty(shape=(m_players, t_periods)); CONS_MT.fill(np.nan)
+    for t in range(0, t_periods):
+        prod_Mt = arr_pl_M_T_vars_modif[:, t, AUTOMATE_INDEX_ATTRS["prod_i"]]
+        cons_Mt = arr_pl_M_T_vars_modif[:, t, AUTOMATE_INDEX_ATTRS["cons_i"]]
+        b0_t = b0_s_T[t]; c0_t = c0_s_T[t]
+        B_Mt = b0_t * prod_Mt
+        C_Mt = c0_t * cons_Mt
+        if t == 0:
+            B_MT_cp[:,t] = B_Mt
+            C_MT_cp[:,t] = C_Mt
+            PROD_MT[:,t] = prod_Mt
+            CONS_MT[:,t] = cons_Mt
+        else:
+            B_MT_cp[:,t] = np.sum(B_MT_cp[:,:t],axis=1) + B_Mt
+            C_MT_cp[:,t] = np.sum(C_MT_cp[:,:t],axis=1) + C_Mt
+            PROD_MT[:,t] = np.sum(PROD_MT[:,:t], axis=1) + prod_Mt
+            CONS_MT[:,t] = np.sum(PROD_MT[:,:t], axis=1) + cons_Mt
+        CC_MT_cp[:,t] = pi_sg_minus_T[t] * CONS_MT[:,t]
+        BB_MT_cp[:,t] = pi_sg_plus_T[t] * PROD_MT[:,t]
+        RU_MT_cp[:,t] = BB_MT_cp[:,t] - CC_MT_cp[:,t]
+        
+    B_M_cp = np.sum(B_MT_cp, axis=1)
+    C_M_cp = np.sum(C_MT_cp, axis=1)
+    BB_M_cp = np.sum(BB_MT_cp, axis=1)
+    CC_M_cp = np.sum(CC_MT_cp, axis=1)
+    RU_M_cp = np.sum(RU_MT_cp, axis=1)
+    
+    cpt_BB_OK, cpt_CC_OK = 0, 0
+    for num_pli in range(0, m_players):
+        if np.abs(BB_M_cp[num_pli] - BB_is_M[num_pli]) < pow(10,-1):
+            cpt_BB_OK += 1
+        if np.abs(CC_M_cp[num_pli] - CC_is_M[num_pli]) < pow(10,-1):
+            cpt_CC_OK += 1
+            
+    print("BB_M OK?: {}, CC_M OK?:{}".format(round(cpt_BB_OK/m_players, 2), 
+                                             round(cpt_CC_OK/m_players, 2)))
+        
+def checkout_prices_B_C_BB_CC_RU_DET(arr_pl_M_T_vars_modif, 
+                                     path_to_save):
+    
+    print("path_to_save={}".format(path_to_save) )
+    # read from hard disk
+    arr_pl_M_T_vars, \
+    b0_s_T, c0_s_T, \
+    B_is_M, C_is_M, \
+    BENs_M_T, CSTs_M_T, \
+    BB_is_M, CC_is_M, RU_is_M, \
+    pi_sg_plus_T, pi_sg_minus_T, \
+    pi_0_plus_T, pi_0_minus_T, \
+    pi_hp_plus_T, pi_hp_minus_T \
+        = get_local_storage_variables(path_to_variable=path_to_save)
+        
+    checkout_prices_4_computing_variables_DET(arr_pl_M_T_vars, 
+                                          pi_sg_minus_T = pi_sg_minus_T, 
+                                          pi_sg_plus_T = pi_sg_plus_T, 
+                                          pi_0_minus_T = pi_0_minus_T, 
+                                          pi_0_plus_T = pi_0_plus_T,
+                                          b0_s_T = b0_s_T, c0_s_T = c0_s_T,
+                                          B_is_M = B_is_M, C_is_M = C_is_M,
+                                          BB_is_M = BB_is_M, CC_is_M = CC_is_M, 
+                                          RU_is_M = RU_is_M)
+###############################################################################
+#              checkout prices from computing variables ---> fin        
+###############################################################################
+
+###############################################################################
 #                       save variables: debut       
 ###############################################################################
 def save_variables(path_to_save, arr_pl_M_T_K_vars, 

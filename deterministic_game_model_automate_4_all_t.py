@@ -14,90 +14,12 @@ import smartgrids_players as players
 import fonctions_auxiliaires as fct_aux
 
 from pathlib import Path
+from datetime import datetime
 
 ###############################################################################
 #                   definition  des fonctions annexes
 #
 ###############################################################################
-# # ____________________ checkout LRI profil --> debut _________________________
-# def checkout_nash_4_profils_by_periods(arr_pl_M_T_vars_modif,
-#                                         arr_pl_M_T_vars,
-#                                         pi_hp_plus, pi_hp_minus, 
-#                                         a, b,
-#                                         pi_0_minus_t, pi_0_plus_t, 
-#                                         bens_csts_M_t,
-#                                         t,
-#                                         manual_debug):
-#     """
-#     verify if the profil at time t and k_stop_learning is a Nash equilibrium.
-#     """
-#     # create a result dataframe of checking players' stability and nash equilibrium
-#     cols = ["players", "nash_modes_t{}".format(t), 'states_t{}'.format(t), 
-#             'Vis_t{}'.format(t), 'Vis_bar_t{}'.format(t), 
-#                'res_t{}'.format(t)] 
-    
-#     m_players = arr_pl_M_T_vars_modif.shape[0]
-#     id_players = list(range(0, m_players))
-#     df_nash_t = pd.DataFrame(index=id_players, columns=cols)
-    
-#     # revert Si to the initial value ie at t and k=0
-#     Sis = arr_pl_M_T_vars[:, t,
-#                           fct_aux.AUTOMATE_INDEX_ATTRS["Si"]]
-#     arr_pl_M_T_vars_modif[:, t,
-#                             fct_aux.AUTOMATE_INDEX_ATTRS["Si"]] = Sis
-    
-#     # stability of each player
-#     modes_profil = list(arr_pl_M_T_vars_modif[
-#                             :, t,
-#                             fct_aux.AUTOMATE_INDEX_ATTRS["mode_i"]] )
-#     for num_pl_i in range(0, m_players):
-#         state_i = arr_pl_M_T_vars_modif[
-#                         num_pl_i, t,
-#                         fct_aux.AUTOMATE_INDEX_ATTRS["state_i"]] 
-#         mode_i = modes_profil[num_pl_i]
-#         mode_i_bar = fct_aux.find_out_opposite_mode(state_i, mode_i)
-        
-#         opposite_modes_profil = modes_profil.copy()
-#         opposite_modes_profil[num_pl_i] = mode_i_bar
-#         opposite_modes_profil = tuple(opposite_modes_profil)
-        
-#         df_nash_t.loc[num_pl_i, "players"] = fct_aux.RACINE_PLAYER+"_"+str(num_pl_i)
-#         df_nash_t.loc[num_pl_i, "nash_modes_t{}".format(t)] = mode_i
-#         df_nash_t.loc[num_pl_i, "states_t{}".format(t)] = state_i
-        
-#         random_mode = False
-#         arr_pl_M_T_K_vars_modif_mode_prof_BAR, \
-#         b0_t_k_bar, c0_t_k_bar, \
-#         bens_t_k_bar, csts_t_k_bar, \
-#         pi_sg_plus_t_k_bar, pi_sg_minus_t_k_bar, \
-#         dico_gamma_players_t_k \
-#             = fct_aux.balanced_player_game_t_4_mode_profil_prices_SG_4_notLearnAlgo(
-#                     arr_pl_M_T_vars_modif.copy(), 
-#                     opposite_modes_profil,
-#                     t, 
-#                     pi_hp_plus, pi_hp_minus, 
-#                     a, b,
-#                     pi_0_plus_t, pi_0_minus_t,
-#                     random_mode,
-#                     manual_debug, dbg=False)
-        
-#         Vi = bens_csts_M_t[num_pl_i]
-#         bens_csts_t_k_bar = bens_t_k_bar - csts_t_k_bar
-#         Vi_bar = bens_csts_t_k_bar[num_pl_i]
-    
-#         df_nash_t.loc[num_pl_i, 'Vis_t{}'.format(t)] = Vi
-#         df_nash_t.loc[num_pl_i, 'Vis_bar_t{}'.format(t)] = Vi_bar
-#         res = None
-#         if Vi >= Vi_bar:
-#             res = "STABLE"
-#             df_nash_t.loc[num_pl_i, 'res_t{}'.format(t)] = res
-#         else:
-#             res = "INSTABLE"
-#             df_nash_t.loc[num_pl_i, 'res_t{}'.format(t)] = res   
-            
-#     return df_nash_t
-    
-# # ____________________ checkout LRI profil -->  fin  _________________________
 
 # _______        balanced players at t and k --> debut          ______________
 def balanced_player_game_4_random_mode(arr_pl_M_T_vars_modif, t, 
@@ -289,27 +211,28 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
     t_periods = arr_pl_M_T_vars_init.shape[1]
     
     # _______ variables' initialization --> debut ________________
-    pi_sg_plus_t, pi_sg_minus_t = 0, 0
-    pi_sg_plus_T = np.empty(shape=(t_periods,)) #      shape (T_PERIODS,)
-    pi_sg_plus_T.fill(np.nan)
-    pi_sg_minus_T = np.empty(shape=(t_periods,)) #      shape (T_PERIODS,)
-    pi_sg_plus_T.fill(np.nan)
-    pi_0_plus_t, pi_0_minus_t = 0, 0
-    pi_0_plus_T = np.empty(shape=(t_periods,)) #     shape (T_PERIODS,)
-    pi_0_plus_T.fill(np.nan)
-    pi_0_minus_T = np.empty(shape=(t_periods,)) #     shape (T_PERIODS,)
-    pi_0_minus_T.fill(np.nan)
-    B_is_M = np.empty(shape=(m_players,)) #   shape (M_PLAYERS, )
-    B_is_M.fill(np.nan)
-    C_is_M = np.empty(shape=(m_players,)) #   shape (M_PLAYERS, )
-    C_is_M.fill(np.nan)
-    b0_ts_T = np.empty(shape=(t_periods,)) #   shape (T_PERIODS,)
-    b0_ts_T.fill(np.nan)
-    c0_ts_T = np.empty(shape=(t_periods,))
-    c0_ts_T.fill(np.nan)
+    pi_sg_plus_T = np.empty(shape=(t_periods,)); pi_sg_plus_T.fill(np.nan)
+    pi_sg_minus_T = np.empty(shape=(t_periods,)); pi_sg_plus_T.fill(np.nan)
+    pi_0_plus_T = np.empty(shape=(t_periods,)); pi_0_plus_T.fill(np.nan)
+    pi_0_minus_T = np.empty(shape=(t_periods,)); pi_0_minus_T.fill(np.nan)
+    pi_hp_plus_T = np.empty(shape=(t_periods, )); pi_hp_plus_T.fill(np.nan)
+    pi_hp_minus_T = np.empty(shape=(t_periods, )); pi_hp_minus_T.fill(np.nan)
+    b0_s_T = np.empty(shape=(t_periods,)); b0_s_T.fill(np.nan)
+    c0_s_T = np.empty(shape=(t_periods,)); c0_s_T.fill(np.nan)
     BENs_M_T = np.empty(shape=(m_players, t_periods)) #   shape (M_PLAYERS, T_PERIODS)
     CSTs_M_T = np.empty(shape=(m_players, t_periods))    
-        
+    prod_M_T = np.empty(shape=(m_players, t_periods)); prod_M_T.fill(np.nan)
+    cons_M_T = np.empty(shape=(m_players, t_periods)); cons_M_T.fill(np.nan)
+    B_is_M_T = np.empty(shape=(m_players, t_periods)); B_is_M_T.fill(np.nan)
+    C_is_M_T = np.empty(shape=(m_players, t_periods)); C_is_M_T.fill(np.nan)
+    B_is_M = np.empty(shape=(m_players, )); B_is_M.fill(np.nan)
+    C_is_M = np.empty(shape=(m_players, )); C_is_M.fill(np.nan)
+    BB_is_M_T = np.empty(shape=(m_players, t_periods)); BB_is_M_T.fill(np.nan)
+    CC_is_M_T = np.empty(shape=(m_players, t_periods)); CC_is_M_T.fill(np.nan)
+    BB_is_M = np.empty(shape=(m_players, )); BB_is_M.fill(np.nan)
+    CC_is_M = np.empty(shape=(m_players, )); CC_is_M.fill(np.nan)
+    RU_is_M = np.empty(shape=(m_players, )); RU_is_M.fill(np.nan)
+    
     
     arr_pl_M_T_vars_modif = arr_pl_M_T_vars_init.copy()
     arr_pl_M_T_vars_modif[:,:,fct_aux.AUTOMATE_INDEX_ATTRS["Si_minus"]] = np.nan
@@ -333,6 +256,10 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
     pi_sg_minus_t0_minus_1 = pi_hp_minus-1
     pi_sg_plus_t_minus_1, pi_sg_minus_t_minus_1 = 0, 0
     pi_sg_plus_t, pi_sg_minus_t = None, None
+    
+    pi_sg_plus_t0_minus_1 = None; pi_sg_minus_t0_minus_1 = None
+    pi_sg_plus_t_minus_1, pi_sg_minus_t_minus_1 = None, None
+    pi_sg_plus_t, pi_sg_minus_t = None, None
     for t in range(0, t_periods):
         print("----- t = {} ------ ".format(t))
         if manual_debug:
@@ -341,16 +268,8 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
             pi_0_plus_t = fct_aux.MANUEL_DBG_PI_0_PLUS_T_K #2 
             pi_0_minus_t = fct_aux.MANUEL_DBG_PI_0_MINUS_T_K #3
         else:
-            pi_sg_plus_t_minus_1 = pi_sg_plus_t0_minus_1 if t == 0 \
-                                                         else pi_sg_plus_t
-            pi_sg_minus_t_minus_1 = pi_sg_minus_t0_minus_1 if t == 0 \
-                                                            else pi_sg_minus_t
-            # pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus/pi_hp_minus, 
-            #                     fct_aux.N_DECIMALS)
-            # pi_0_minus_t = pi_sg_minus_t_minus_1
             q_t_minus, q_t_plus = fct_aux.compute_upper_bound_quantity_energy(
                                     arr_pl_M_T_vars_modif, t)
-            # print("q_t_minus={}, q_t_plus={}".format(q_t_minus, q_t_plus))
             phi_hp_minus_t = fct_aux.compute_cost_energy_bought_by_SG_2_HP(
                                 pi_hp_minus=pi_hp_minus, 
                                 quantity=q_t_minus,
@@ -365,12 +284,26 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
             pi_hp_plus_t = round(phi_hp_plus_t/q_t_plus, fct_aux.N_DECIMALS) \
                             if q_t_plus != 0 \
                             else 0
-            pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus_t/pi_hp_minus_t, 
-                                fct_aux.N_DECIMALS)
-            pi_0_minus_t = pi_sg_minus_t_minus_1
             if t == 0:
-               pi_0_plus_t = fct_aux.PI_0_PLUS_INIT #4
-               pi_0_minus_t = fct_aux.PI_0_MINUS_INIT #3
+                pi_sg_plus_t0_minus_1 = pi_hp_plus_t - 1
+                pi_sg_minus_t0_minus_1 = pi_hp_minus_t - 1
+            pi_sg_plus_t_minus_1 = pi_sg_plus_t0_minus_1 if t == 0 \
+                                                         else pi_sg_plus_t
+            pi_sg_minus_t_minus_1 = pi_sg_minus_t0_minus_1 if t == 0 \
+                                                            else pi_sg_minus_t
+            
+            print("q_t-={}, phi_hp-={}, pi_hp-={}, pi_sg-_t-1={}, ".format(q_t_minus, phi_hp_minus_t, pi_hp_minus_t, pi_sg_minus_t_minus_1))
+            print("q_t+={}, phi_hp+={}, pi_hp+={}, pi_sg+_t-1={}".format(q_t_plus, phi_hp_plus_t, pi_hp_plus_t, pi_sg_plus_t_minus_1))
+            
+            pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus_t/pi_hp_minus_t, 
+                                fct_aux.N_DECIMALS) \
+                            if t > 0 \
+                            else fct_aux.PI_0_PLUS_INIT #4
+                                
+            pi_0_minus_t = pi_sg_minus_t_minus_1 \
+                            if t > 0 \
+                            else fct_aux.PI_0_MINUS_INIT #3
+            print("t={}, pi_0_plus_t={}, pi_0_minus_t={}".format(t, pi_0_plus_t, pi_0_minus_t))
                
         if t == 0:
             print("before compute gamma state 4 t={}, modes={}, Sis={},  Si_old={}, ris={}".format(
@@ -415,6 +348,10 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
             
         pi_0_plus_T[t] = pi_0_plus_t
         pi_0_minus_T[t] = pi_0_minus_t
+        pi_hp_plus_T[t] = pi_hp_plus_t
+        pi_hp_minus_T[t] = pi_hp_minus_t
+        pi_sg_plus_T[t] = pi_sg_plus_t_minus_1
+        pi_sg_minus_T[t] = pi_sg_minus_t_minus_1
         
         # balanced player game at instant t
         dico_gamme_t = dict()
@@ -444,12 +381,10 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
             pi_sg_plus_t = 0
         if np.isnan(pi_sg_minus_t):
             pi_sg_minus_t = 0
-        pi_sg_plus_T[t] = pi_sg_plus_t
-        pi_sg_minus_T[t] = pi_sg_minus_t
         
         # b0_ts, c0_ts of shape (T_PERIODS,)
-        b0_ts_T[t] = b0_t
-        c0_ts_T[t] = c0_t
+        b0_s_T[t] = b0_t
+        c0_s_T[t] = c0_t
         
         # BENs, CSTs of shape (M_PLAYERS, T_PERIODS)
         BENs_M_T[:,t] = bens_t
@@ -508,28 +443,12 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
     # ____          run balanced sg for all t_periods : fin           ________
     
     # __________        compute prices variables         ____________________
-    # B_is, C_is of shape (M_PLAYERS, )
-    prod_i_M_T = arr_pl_M_T_vars_modif[:,:t_periods, 
-                                       fct_aux.AUTOMATE_INDEX_ATTRS["prod_i"]]
-    cons_i_M_T = arr_pl_M_T_vars_modif[:,:t_periods, 
-                                       fct_aux.AUTOMATE_INDEX_ATTRS["cons_i"]]
-    
-    B_is_M = np.sum(b0_ts_T * prod_i_M_T, axis=1)
-    C_is_M = np.sum(c0_ts_T * cons_i_M_T, axis=1)
-    
-    # BB_is, CC_is, RU_is of shape (M_PLAYERS, )
-    CONS_is_M = np.sum(cons_i_M_T, axis=1)
-    PROD_is_M = np.sum(prod_i_M_T, axis=1)
-    
-    BB_is_M = pi_sg_plus_T[t_periods-1] * PROD_is_M #np.sum(PROD_is)
-    for num_pl, bb_i in enumerate(BB_is_M):
-        if bb_i != 0:
-            print("player {}, BB_i={}".format(num_pl, bb_i))
-    CC_is_M = pi_sg_minus_T[t_periods-1] * CONS_is_M #np.sum(CONS_is)
-    RU_is_M = BB_is_M - CC_is_M
-    
-    pi_hp_plus_s = np.array([pi_hp_plus] * t_periods, dtype=object)
-    pi_hp_minus_s = np.array([pi_hp_minus] * t_periods, dtype=object) 
+    B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M \
+        = fct_aux.compute_prices_B_C_BB_CC_RU_DET(
+                arr_pl_M_T_vars_modif=arr_pl_M_T_vars_modif, 
+                pi_sg_minus_T=pi_sg_minus_T, pi_sg_plus_T=pi_sg_plus_T, 
+                pi_0_minus_T=pi_0_minus_T, pi_0_plus_T=pi_0_plus_T,
+                b0_s_T=b0_s_T, c0_s_T=c0_s_T)
     
     #__________      save computed variables locally      _____________________ 
     algo_name = "RD-DETERMINIST" if random_determinist else "DETERMINIST"
@@ -541,24 +460,33 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
     
     if m_players<=22:
         fct_aux.save_variables(path_to_save, arr_pl_M_T_vars_modif, 
-                       b0_ts_T, c0_ts_T, B_is_M, C_is_M, 
+                       b0_s_T, c0_s_T, B_is_M, C_is_M, 
                        BENs_M_T, CSTs_M_T, 
                        BB_is_M, CC_is_M, RU_is_M, 
                        pi_sg_minus_T, pi_sg_plus_T, 
                        pi_0_minus_T, pi_0_plus_T,
-                       pi_hp_plus_s, pi_hp_minus_s, dico_stats_res, 
+                       pi_hp_plus_T, pi_hp_minus_T, dico_stats_res, 
                        algo=algo_name, 
                        dico_best_steps=dico_mode_prof_by_players_T)
     else:
         fct_aux.save_variables(path_to_save, arr_pl_M_T_vars_modif, 
-                    b0_ts_T, c0_ts_T, B_is_M, C_is_M, 
+                    b0_s_T, c0_s_T, B_is_M, C_is_M, 
                     BENs_M_T, CSTs_M_T, 
                     BB_is_M, CC_is_M, RU_is_M, 
                     pi_sg_minus_T, pi_sg_plus_T, 
                     pi_0_minus_T, pi_0_plus_T,
-                    pi_hp_plus_s, pi_hp_minus_s, dico_stats_res, 
+                    pi_hp_plus_T, pi_hp_minus_T, dico_stats_res, 
                     algo=algo_name, 
                     dico_best_steps=dico_mode_prof_by_players_T)
+        
+        
+    # _____         checkout prices from computing variables: debut      _____7
+    dbg=True
+    if dbg:
+        fct_aux.checkout_prices_B_C_BB_CC_RU_DET(
+                arr_pl_M_T_vars_modif=arr_pl_M_T_vars_modif, 
+                path_to_save=path_to_save)
+    # _____         checkout prices from computing variables: fin        _____
         
     print("DETERMINIST GAME: pi_hp_plus={}, pi_hp_minus ={} ---> FIN \n"\
           .format( pi_hp_plus, pi_hp_minus))
@@ -572,6 +500,7 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
 #                   definition  des unittests
 #
 ###############################################################################
+
 def test_DETERMINIST_balanced_player_game_Pi_Ci_NEW_AUTOMATE():
     a = 1; b = 1
     pi_hp_plus = 10 #0.2*pow(10,-3)
@@ -602,6 +531,10 @@ def test_DETERMINIST_balanced_player_game_Pi_Ci_NEW_AUTOMATE():
                             path_to_arr_pl_M_T, used_instances)
     fct_aux.checkout_values_Pi_Ci_arr_pl(arr_pl_M_T_vars_init)
     
+    algo_name = "DETERMINIST" if random_determinist else "RD-DETERMINIST"
+    name_simu = algo_name+"_simu_"+datetime.now().strftime("%d%m_%H%M")
+    path_to_save = os.path.join("tests", name_simu)
+    
     arr_pl_M_T_vars = \
         determinist_balanced_player_game(
                                  arr_pl_M_T_vars_init.copy(),
@@ -611,7 +544,7 @@ def test_DETERMINIST_balanced_player_game_Pi_Ci_NEW_AUTOMATE():
                                  gamma_version=gamma_version,
                                  random_determinist=random_determinist,
                                  used_storage=used_storage,
-                                 path_to_save="tests", 
+                                 path_to_save=path_to_save, 
                                  manual_debug=manual_debug, dbg=dbg)
         
     return arr_pl_M_T_vars

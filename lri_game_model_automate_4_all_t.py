@@ -1206,13 +1206,7 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
             pi_0_plus_t = fct_aux.MANUEL_DBG_PI_0_PLUS_T_K #4 
             pi_0_minus_t = fct_aux.MANUEL_DBG_PI_0_MINUS_T_K #3
         else:
-            # pi_sg_plus_t_minus_1 = pi_sg_plus_t0_minus_1 if t == 0 \
-            #                                              else pi_sg_plus_t
-            # pi_sg_minus_t_minus_1 = pi_sg_minus_t0_minus_1 if t == 0 \
-            #                                                 else pi_sg_minus_t
-            # pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus/pi_hp_minus, 
-            #                     fct_aux.N_DECIMALS)
-            # pi_0_minus_t = pi_sg_minus_t_minus_1
+
             q_t_minus, q_t_plus = fct_aux.compute_upper_bound_quantity_energy(
                                     arr_pl_M_T_K_vars_modif, t)
             phi_hp_minus_t = fct_aux.compute_cost_energy_bought_by_SG_2_HP(
@@ -1469,7 +1463,7 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
     
     # __________         compute prices variables: debut          _____________
     B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M \
-        = compute_prices_B_C_BB_CC_RU(arr_pl_M_T_K_vars_modif, 
+        = compute_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif, 
                                         dico_k_stop_learnings,
                                         pi_sg_minus_T, pi_sg_plus_T, 
                                         pi_0_minus_T, pi_0_plus_T,
@@ -1511,7 +1505,7 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
     
     # _____         checkout prices from computing variables: debut      _____7
     if dbg:
-        checkout_prices_B_C_BB_CC_RU(arr_pl_M_T_K_vars_modif, 
+        checkout_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif, 
                                         dico_k_stop_learnings,
                                         path_to_save)
     # _____         checkout prices from computing variables: fin        _____
@@ -1526,7 +1520,7 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
 #
 ###############################################################################
 # _____             compute prices B C BB CC RU ---> debut                _____
-def compute_prices_B_C_BB_CC_RU(arr_pl_M_T_K_vars_modif, 
+def compute_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif, 
                                 dico_k_stop_learnings,
                                 pi_sg_minus_T, pi_sg_plus_T, 
                                 pi_0_minus_T, pi_0_plus_T,
@@ -1581,7 +1575,7 @@ def compute_prices_B_C_BB_CC_RU(arr_pl_M_T_K_vars_modif,
 
 
 # _____         checkout prices from computing variables ---> debut      _____
-def checkout_prices_4_computing_variables(arr_pl_M_T_K_vars_modif, 
+def checkout_prices_4_computing_variables_LRI(arr_pl_M_T_K_vars_modif, 
                                             dico_k_stop_learnings,
                                             pi_sg_minus_T, pi_sg_plus_T, 
                                             pi_0_minus_T, pi_0_plus_T,
@@ -1643,7 +1637,7 @@ def checkout_prices_4_computing_variables(arr_pl_M_T_K_vars_modif,
     print("BB_M OK?: {}, CC_M OK?:{}".format(round(cpt_BB_OK/m_players, 2), 
                                              round(cpt_CC_OK/m_players, 2)))
         
-def checkout_prices_B_C_BB_CC_RU(arr_pl_M_T_K_vars_modif, 
+def checkout_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif, 
                                     dico_k_stop_learnings,
                                     path_to_save):
     
@@ -1656,10 +1650,10 @@ def checkout_prices_B_C_BB_CC_RU(arr_pl_M_T_K_vars_modif,
     BB_is_M, CC_is_M, RU_is_M, \
     pi_sg_plus_T_K, pi_sg_minus_T_K, \
     pi_0_plus_T_K, pi_0_minus_T_K, \
-    pi_hp_plus_s, pi_hp_minus_s \
+    pi_hp_plus_T, pi_hp_minus_T \
         = fct_aux.get_local_storage_variables(path_to_variable=path_to_save)
         
-    checkout_prices_4_computing_variables(arr_pl_M_T_K_vars, 
+    checkout_prices_4_computing_variables_LRI(arr_pl_M_T_K_vars, 
                                           dico_k_stop_learnings,
                                           pi_sg_minus_T = pi_sg_minus_T_K, 
                                           pi_sg_plus_T = pi_sg_plus_T_K, 
@@ -1670,10 +1664,6 @@ def checkout_prices_B_C_BB_CC_RU(arr_pl_M_T_K_vars_modif,
                                           B_is_M = B_is_M, C_is_M = C_is_M,
                                           BB_is_M = BB_is_M, CC_is_M = CC_is_M, 
                                           RU_is_M = RU_is_M)
-    
-        
-    
-        
     
 # _____         checkout prices from computing variables ---> fin        _____
 
