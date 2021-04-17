@@ -257,11 +257,13 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
     pi_sg_plus_t_minus_1, pi_sg_minus_t_minus_1 = 0, 0
     pi_sg_plus_t, pi_sg_minus_t = None, None
     
-    pi_sg_plus_t0_minus_1 = None; pi_sg_minus_t0_minus_1 = None
+    pi_sg_plus_t0_minus_1, pi_sg_minus_t0_minus_1 = None, None
     pi_sg_plus_t_minus_1, pi_sg_minus_t_minus_1 = None, None
     pi_sg_plus_t, pi_sg_minus_t = None, None
+    pi_hp_plus_t, pi_hp_minus_t = None, None
     for t in range(0, t_periods):
         print("----- t = {} ------ ".format(t))
+        
         if manual_debug:
             pi_sg_plus_t = fct_aux.MANUEL_DBG_PI_SG_PLUS_T_K #8
             pi_sg_minus_t = fct_aux.MANUEL_DBG_PI_SG_MINUS_T_K #10
