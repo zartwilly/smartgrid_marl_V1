@@ -52,8 +52,6 @@ if __name__ == "__main__":
     # setA_m_players, setB1_m_players = 15, 5, 
     # setB1_m_players, setC_m_players = 5, 10                                  # debug_one_period
     # setA_m_players, setB_m_players, setC_m_players = 10, 6, 5
-    setA_m_players, setB1_m_players = 3, 1,                                     # 7 players
-    setB1_m_players, setC_m_players = 1, 2 
     # _____                    players by sets --> fin               __________
     
     debug_all_periods = True #False #True #False #False #True
@@ -76,8 +74,8 @@ if __name__ == "__main__":
         nb_periods = None
         # ---- new constances simu_DDMM_HHMM --- **** debug *****
         date_hhmm = "DDMM_HHMM"
-        t_periods = 4 #10 #4 #10 #30 #50 #30 #35 #55 #117 #15 #3
-        k_steps = 25 #250 #250 #250 #100 #250 #5000 #2000 #50 #250
+        t_periods = 3#4 #10 #4 #10 #30 #50 #30 #35 #55 #117 #15 #3
+        k_steps = 50#25 #250 #250 #250 #100 #250 #5000 #2000 #50 #250
         NB_REPEAT_K_MAX= 10 #3 #15 #30
         learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
         fct_aux.N_DECIMALS = 8
@@ -90,7 +88,7 @@ if __name__ == "__main__":
         
         algos = ["LRI1", "LRI2", "DETERMINIST"] \
                 + fct_aux.ALGO_NAMES_BF
-        #algos = ["LRI1", "LRI2", "DETERMINIST"]
+        algos = ["LRI1", "LRI2", "DETERMINIST"]
         
         dbg_234_players = False #True #False
         used_storage_det= True #False #True

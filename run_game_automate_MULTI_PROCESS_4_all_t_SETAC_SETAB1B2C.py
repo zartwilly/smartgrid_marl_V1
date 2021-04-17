@@ -107,6 +107,8 @@ if __name__ == "__main__":
     #2 #1 #3: gamma_i_min #4: square_root
     gamma_versions = [0,1,2,3,4]
     gamma_versions = [1,3]
+    gamma_versions = [0,2,3]
+    gamma_versions = [4]
     # _____                     gamma_version --> fin               __________
     
     
@@ -133,7 +135,7 @@ if __name__ == "__main__":
         nb_periods = None
         # ---- new constances simu_DDMM_HHMM --- **** debug *****
         date_hhmm = "DDMM_HHMM"
-        t_periods = 30 #20 #50 #10 #30 #50 #30 #35 #55 #117 #15 #3
+        t_periods = 20 #20 #50 #10 #30 #50 #30 #35 #55 #117 #15 #3
         k_steps = 250 #250 #5 #100 #250 #5000 #2000 #50 #250
         NB_REPEAT_K_MAX= 10 #3 #15 #30
         learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
@@ -205,7 +207,7 @@ if __name__ == "__main__":
     setB2_m_players_12 = 5; setC_m_players_12 = 8;                             # 26 players
     setA_m_players_0 = 10; setC_m_players_0 = 10;                              # 20 players
 
-    dico_012, dico_0 = {}, {}
+    dico_012 = {}
     for scenario_name, scenario in dico_scenario.items():
         if scenario_name in ["scenario1", "scenario2"]:
             arr_pl_M_T_vars_init \

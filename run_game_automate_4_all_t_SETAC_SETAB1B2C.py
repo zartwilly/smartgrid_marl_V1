@@ -49,7 +49,7 @@ if __name__ == "__main__":
     # _____                     gamma_version --> debut             __________
     #2 #1 #3: gamma_i_min #4: square_root
     gamma_versions = [0,1,2,3,4]
-    gamma_versions = [1,3]
+    #gamma_versions = [1,3]
     # _____                     gamma_version --> fin               __________
     
     # _____                    players by sets --> debut             __________
@@ -80,8 +80,8 @@ if __name__ == "__main__":
         nb_periods = None
         # ---- new constances simu_DDMM_HHMM --- **** debug *****
         date_hhmm = "DDMM_HHMM"
-        t_periods = 4 #10 #4 #10 #30 #50 #30 #35 #55 #117 #15 #3
-        k_steps = 5 #250 #250 #100 #250 #5000 #2000 #50 #250
+        t_periods = 3#4 #10 #4 #10 #30 #50 #30 #35 #55 #117 #15 #3
+        k_steps = 50 #250 #250 #100 #250 #5000 #2000 #50 #250
         NB_REPEAT_K_MAX= 10 #3 #15 #30
         learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
         fct_aux.N_DECIMALS = 8

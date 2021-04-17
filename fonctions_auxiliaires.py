@@ -333,7 +333,7 @@ def compute_energy_unit_price(pi_0_plus, pi_0_minus,
         else (phi_hp_minus + In_sg*pi_0_minus)/Out_sg
     b0 = pi_0_plus \
         if In_sg < Out_sg \
-        else (In_sg * pi_0_plus + phi_hp_plus)/In_sg
+        else (Out_sg * pi_0_plus + phi_hp_plus)/In_sg
    
     return round(b0, N_DECIMALS), round(c0, N_DECIMALS)
 # _________             compute b0, c0: fin               _____________________
@@ -747,6 +747,81 @@ def save_instances_games(arr_pl_M_T, name_file_arr_pl, path_to_save):
 #                           save variables: fin       
 ###############################################################################
 
+############################################################################### 
+#               
+#        get local variables and turn them into dataframe --> debut
+###############################################################################
+def get_local_storage_variables(path_to_variable):
+    """
+    obtain the content of variables stored locally .
+
+    Returns
+    -------
+     arr_pls_M_T, RUs, B0s, C0s, BENs, CSTs, pi_sg_plus_s, pi_sg_minus_s.
+    
+    arr_pls_M_T: array of players with a shape M_PLAYERS*T_PERIODS*INDEX_ATTRS
+    arr_T_nsteps_vars : array of players with a shape 
+                        M_PLAYERS*T_PERIODS*NSTEPS*vars_nstep
+                        avec len(vars_nstep)=20
+    RUs: array of (M_PLAYERS,)
+    BENs: array of M_PLAYERS*T_PERIODS
+    CSTs: array of M_PLAYERS*T_PERIODS
+    B0s: array of (T_PERIODS,)
+    C0s: array of (T_PERIODS,)
+    pi_sg_plus_s: array of (T_PERIODS,)
+    pi_sg_minus_s: array of (T_PERIODS,)
+
+    pi_hp_plus_s: array of (T_PERIODS,)
+    pi_hp_minus_s: array of (T_PERIODS,)
+    """
+
+    arr_pl_M_T_K_vars = np.load(os.path.join(path_to_variable, 
+                                             "arr_pl_M_T_K_vars.npy"),
+                          allow_pickle=True)
+    b0_s_T_K = np.load(os.path.join(path_to_variable, "b0_s_T_K.npy"),
+                          allow_pickle=True)
+    c0_s_T_K = np.load(os.path.join(path_to_variable, "c0_s_T_K.npy"),
+                          allow_pickle=True)
+    B_is_M = np.load(os.path.join(path_to_variable, "B_is_M.npy"),
+                          allow_pickle=True)
+    C_is_M = np.load(os.path.join(path_to_variable, "C_is_M.npy"),
+                          allow_pickle=True)
+    BENs_M_T_K = np.load(os.path.join(path_to_variable, "BENs_M_T_K.npy"),
+                          allow_pickle=True)
+    CSTs_M_T_K = np.load(os.path.join(path_to_variable, "CSTs_M_T_K.npy"),
+                          allow_pickle=True)
+    BB_is_M = np.load(os.path.join(path_to_variable, "BB_is_M.npy"),
+                          allow_pickle=True)
+    CC_is_M = np.load(os.path.join(path_to_variable, "CC_is_M.npy"),
+                          allow_pickle=True)
+    RU_is_M = np.load(os.path.join(path_to_variable, "RU_is_M.npy"),
+                          allow_pickle=True)
+    pi_sg_plus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_plus_T_K.npy"),
+                          allow_pickle=True)
+    pi_sg_minus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_minus_T_K.npy"),
+                          allow_pickle=True)
+    pi_0_plus_T_K = np.load(os.path.join(path_to_variable, "pi_0_plus_T_K.npy"),
+                          allow_pickle=True)
+    pi_0_minus_T_K = np.load(os.path.join(path_to_variable, "pi_0_minus_T_K.npy"),
+                          allow_pickle=True)
+    pi_hp_plus_s = np.load(os.path.join(path_to_variable, "pi_hp_plus_s.npy"),
+                          allow_pickle=True)
+    pi_hp_minus_s = np.load(os.path.join(path_to_variable, "pi_hp_minus_s.npy"),
+                          allow_pickle=True)
+    
+    return arr_pl_M_T_K_vars, \
+            b0_s_T_K, c0_s_T_K, \
+            B_is_M, C_is_M, \
+            BENs_M_T_K, CSTs_M_T_K, \
+            BB_is_M, CC_is_M, RU_is_M, \
+            pi_sg_plus_T_K, pi_sg_minus_T_K, \
+            pi_0_plus_T_K, pi_0_minus_T_K, \
+            pi_hp_plus_s, pi_hp_minus_s
+            
+############################################################################### 
+#               
+#        get local variables and turn them into dataframe --> fin
+################################################################################
 
 ###############################################################################
 #            generate Pi, Ci by automate --> debut
