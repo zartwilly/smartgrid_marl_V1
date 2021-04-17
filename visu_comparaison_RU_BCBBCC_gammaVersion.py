@@ -1105,6 +1105,7 @@ def plot_comparaison_gamma_version_all_scenarios(df_B_C_BB_CC_RU_M):
                         & (df_B_C_BB_CC_RU_M.prices == price)
         df_ra_pr = df_B_C_BB_CC_RU_M[mask_ra_pr].copy()
         
+        
         pxs_pr_ra = plot_gamma_version_all_scenarios(df_ra_pr, rate, price)
         pxs_pr_ra.legend.click_policy="hide"
         
@@ -1523,6 +1524,22 @@ if __name__ == "__main__":
                             "gamma_V0_V1_V2_V3_V4_T50_kstep250_setACsetAB1B2C")
     name_dir = os.path.join("tests", 
                             "gamma_V1_V3_T30_kstep250_setACsetAB1B2C")
+    #gamma_V0_V1_V2_V3_T20_kstep250_setACsetAB1B2C
+    name_dir = os.path.join("tests", 
+                            "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
+    
+    #_______ debug understand moy_Vi increase with t periods _________________
+    # k_steps = 50
+    # name_dir = os.path.join("tests", 
+    #                         "DBGgammaMulti_V0_V1_V2_V3_V4_T3_kstep50_setACsetAB1B2C")
+    # name_dir = os.path.join("tests", 
+    #                         "DBGgammaProced_V0_V1_V2_V3_V4_T3_kstep50_setACsetAB1B2C")
+    # name_dir = os.path.join("tests", 
+    #                         "DBGgamma_V0_V1_V2_V3_V4_T3_kstep50_setAC")
+    # name_dir = os.path.join("tests", 
+    #                         "DBGgamma_V0_V1_V2_V3_V4_T3_kstep50_setAB1B2C")
+    #_______ debug understand moy_Vi increase with t periods _________________
+    
     #name_dir = os.path.join("tests_cp")
     nb_sub_dir = len(name_dir.split(os.sep))
     
@@ -1530,9 +1547,12 @@ if __name__ == "__main__":
     selected_gamma_version = True;
     tuple_paths, path_2_best_learning_steps = list(), list()
     if selected_gamma_version:
-        dico_SelectGammaVersion={"DETERMINIST": [1,3], 
-                                 "LRI1": [1],
-                                 "LRI2": [3]}
+        dico_SelectGammaVersion={"DETERMINIST": [0,1,2,3,4], 
+                                  "LRI1": [0,1,2,3,4],
+                                  "LRI2": [0,1,2,3,4]}
+        # dico_SelectGammaVersion={"DETERMINIST": [1,3], 
+        #                          "LRI1": [1],
+        #                          "LRI2": [3]}
         # dico_SelectGammaVersion={"DETERMINIST": [1,3], 
         #                          "LRI1": [1,3],
         #                           "LRI2": [1,3]}
@@ -1544,7 +1564,8 @@ if __name__ == "__main__":
         tuple_paths, path_2_best_learning_steps \
             = get_tuple_paths_of_arrays(name_dirs=[name_dir], 
                                         nb_sub_dir=nb_sub_dir)
-    
+            
+    tuple_paths = list(set(tuple_paths))
         
     df_arr_M_T_Ks, df_ben_cst_M_T_K, \
     df_b0_c0_pisg_pi0_T_K, df_B_C_BB_CC_RU_M \
