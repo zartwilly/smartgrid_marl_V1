@@ -299,6 +299,10 @@ if __name__ == "__main__":
     envoie_mail(message, subject)
     # envoie_mail_with_pieces_jointes(message, subject, path_files)
     
+    import pandas as pd
+    d = {"running": time.time()-ti}
+    pd.DataFrame(list(d.items())).to_csv("running_time.csv")
+    
     print("runtime = {}".format(time.time() - ti))
     
     
