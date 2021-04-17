@@ -99,6 +99,7 @@ if __name__ == "__main__":
                  (prob_B2_A, prob_B2_B1, prob_B2_B2, prob_B2_C),
                  (prob_C_A, prob_C_B1, prob_C_B2, prob_C_C)]
     
+    scenario_names = {"scenario0", "scenario1", "scenario2"}
     dico_scenario = {"scenario0": scenario0,
                      "scenario1": scenario1, 
                      "scenario2": scenario2}
@@ -109,6 +110,7 @@ if __name__ == "__main__":
     gamma_versions = [1,3]
     gamma_versions = [0,2,3]
     gamma_versions = [4]
+    gamma_versions = [0,1,2,3,4]
     # _____                     gamma_version --> fin               __________
     
     
@@ -229,10 +231,32 @@ if __name__ == "__main__":
                         path_to_arr_pl_M_T, used_instances)
             dico_012[scenario_name] = arr_pl_M_T_vars_init
       
+    setX = ""
+    if set(dico_scenario.keys()) == {"scenario0", "scenario1", "scenario2"} \
+        or set(dico_scenario.keys()) == {"scenario0", "scenario1"} \
+        or set(dico_scenario.keys()) == {"scenario0", "scenario2"} :
+        setX = "setACsetAB1B2C"
+    elif set(dico_scenario.keys()) == {"scenario0"}:
+        setX = "setAC"
+    elif set(dico_scenario.keys()) == {"scenario1", "scenario2"} \
+        or set(dico_scenario.keys()) == {"scenario1"} \
+        or set(dico_scenario.keys()) == {"scenario2"}:
+        setX = "setAB1B2C"
+
+    gamma_Vxs = set(gamma_versions)
+    root_gamVersion = "gamma"
+    for gamma_version in gamma_Vxs:
+        root_gamVersion =  root_gamVersion + "_V"+str(gamma_version)
+    
+    "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C"
+    name_execution = root_gamVersion \
+                        + "_" + "T"+str(t_periods) \
+                        + "_" + "ksteps" + str(k_steps) \
+                        + "_" + setX 
     zip_scen_arr = list(zip(list(dico_012.keys()), list(dico_012.values())))
     dico_params = {
         "zip_scen_arr": zip_scen_arr,
-        "name_dir": name_dir,
+        "name_dir": os.path.join(name_dir,name_execution),
         "date_hhmm": date_hhmm,
         "t_periods": t_periods,
         "k_steps": k_steps,
@@ -240,7 +264,7 @@ if __name__ == "__main__":
         "algos": algos,
         "learning_rates": learning_rates,
         "tuple_pi_hp_plus_minus": tuple_pi_hp_plus_minus,
-         "a": a, "b": b,
+          "a": a, "b": b,
         "gamma_versions": gamma_versions,
         "used_instances": used_instances,
         "used_storage_det": used_storage_det,
