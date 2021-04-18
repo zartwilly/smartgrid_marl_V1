@@ -1610,6 +1610,7 @@ def plot_distribution(df_al_pr_ra_sc, algo, rate, price, scenario):
                title="number of players, ({}, {}, rate={}, price={})".format(
                   algo, scenario, rate, price),
                 toolbar_location=None, tools=TOOLS)
+    
 
     data = dict(x=x, nb_players=nb_players)
     
@@ -1671,12 +1672,170 @@ def plot_distribution_by_states_4_periods(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M
 #                   distribution by states for periods ---> fin
 # _____________________________________________________________________________
 
+
+# _____________________________________________________________________________
+#
+#              evolution prices B, C, BB, CC, RU for periods ---> debut
+# _____________________________________________________________________________
+def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate, 
+                                   price, scenario, gamma_version):
+    
+    cols = ["t", "B", "C", "BB", "CC", "RU"]
+    
+    df_res_t = df_al_pr_ra_sc_gam.groupby(cols[0])[cols[1:]]\
+                .agg({cols[1]:[np.mean, np.std, np.min, np.max], 
+                      cols[2]:[np.mean, np.std, np.min, np.max], 
+                      cols[3]:[np.mean, np.std, np.min, np.max], 
+                      cols[4]:[np.mean, np.std, np.min, np.max], 
+                      cols[5]:[np.mean, np.std, np.min, np.max]})
+    
+    df_res_t.columns = ["_".join(x) for x in df_res_t.columns.ravel()]
+    df_res_t = df_res_t.reset_index()
+    
+    df_res_t.t = df_res_t.t.astype("str")
+    
+    aggs = ["amin", "amax", "std", "mean"]
+    tooltips = [("{}_{}".format(col, agg), "@{}_{}".format(col, agg)) 
+                for (col, agg) in it.product(cols[1:], aggs)]
+    TOOLS[7] = HoverTool(tooltips = tooltips)
+    
+    new_cols = [col[1].split("@")[1] 
+                for col in tooltips if col[1].split("_")[1] == "mean"]
+    print('new_cols={}, df_res_t.cols={}'.format(new_cols, df_res_t.columns))
+    
+    x = list(map(tuple,list(df_res_t.t.values)))
+    px = figure(x_range=df_res_t.t.values.tolist(), 
+                y_range=(0, df_res_t[new_cols].values.max() + 5), 
+                plot_height = int(350), 
+                plot_width = int(WIDTH*MULT_WIDTH), tools = TOOLS, 
+                toolbar_location="above")
+           
+    data = dict(x = x, 
+                B_mean=df_res_t.B_mean.tolist(), 
+                C_mean=df_res_t.C_mean.tolist(), 
+                BB_mean=df_res_t.BB_mean.tolist(), 
+                CC_mean=df_res_t.CC_mean.tolist(), 
+                RU_mean=df_res_t.RU_mean.tolist(), 
+                B_std=df_res_t.B_std.tolist(), 
+                C_std=df_res_t.C_std.tolist(), 
+                BB_std=df_res_t.BB_std.tolist(), 
+                CC_std=df_res_t.CC_std.tolist(), 
+                RU_std=df_res_t.RU_std.tolist(),
+                B_amin=df_res_t.B_amin.tolist(), 
+                C_amin=df_res_t.C_amin.tolist(), 
+                BB_amin=df_res_t.BB_amin.tolist(), 
+                CC_amin=df_res_t.CC_amin.tolist(), 
+                RU_amin=df_res_t.RU_amin.tolist(), 
+                B_amax=df_res_t.B_amax.tolist(), 
+                C_amax=df_res_t.C_amax.tolist(), 
+                BB_amax=df_res_t.BB_amax.tolist(), 
+                CC_amax=df_res_t.CC_amax.tolist(), 
+                RU_amax=df_res_t.RU_amax.tolist()
+                )
+
+    print("data keys={}".format(data.keys()))
+    source = ColumnDataSource(data = data)
+    
+    width= 0.1 #0.5
+    # px.vbar(x='x', top=new_cols[4], width=0.9, source=source, color="#c9d9d3")
+            
+    # px.vbar(x='x', top=new_cols[0], width=0.9, source=source, color="#718dbf")
+    
+    px.vbar(x=dodge('x', -0.3+0*width, range=px.x_range), top=new_cols[0], 
+                    width=width, source=source, legend_label=new_cols[0], 
+                    color="#c9d9d3")
+    px.vbar(x=dodge('x', -0.3+1*width, range=px.x_range), top=new_cols[1], 
+                    width=width, source=source, legend_label=new_cols[1], 
+                    color="#718dbf")
+    px.vbar(x=dodge('x', -0.3+2*width, range=px.x_range), top=new_cols[2], 
+                    width=width, source=source, legend_label=new_cols[2], 
+                    color="#e84d60")
+    px.vbar(x=dodge('x', -0.3+3*width, range=px.x_range), top=new_cols[3], 
+                    width=width, source=source, legend_label=new_cols[3], 
+                    color="#ddb7b1")
+    px.vbar(x=dodge('x', -0.3+4*width, range=px.x_range), top=new_cols[4], 
+                    width=width, source=source, legend_label=new_cols[4], 
+                    color="#FFD700")
+    
+    title = "gain evolution over time ({}, {}, rate:{}, price={}, gamma_version={})".format(
+                algo, scenario, rate, price, gamma_version)
+    px.title.text = title
+    px.y_range.start = df_res_t.RU_mean.min() - 1
+    px.x_range.range_padding = width
+    px.xgrid.grid_line_color = None
+    px.legend.location = "top_right" #"top_left"
+    px.legend.orientation = "horizontal"
+    px.xaxis.axis_label = "t_periods"
+    px.yaxis.axis_label = "values"
+    
+    return px
+    
+
+
+def plot_evolution_RU_C_B_CC_BB_over_time(
+                    df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
+                    algos=["LRI1"], 
+                    gamma_versions=["gammaV1"], 
+                    scenarios=["scenario0"]
+                    ):
+    
+    df = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T.copy()
+    
+    rates = df.rate.unique(); rates = rates[rates!=0].tolist()
+    prices = df.prices.unique().tolist()
+    scenarios = df.scenario.unique().tolist() if len(scenarios) == 0 \
+                                                else scenarios
+    gamma_versions = df.gamma_version.unique().tolist() \
+                        if len(gamma_versions) == 0 \
+                        else gamma_versions
+    algos = df.algo.unique().tolist() if len(algos) == 0 else algos 
+    
+    dico_pxs = dict()
+    for algo, price, rate, scenario, gamma_version \
+        in it.product(algos, prices, rates, scenarios, gamma_versions):
+        mask_al_pr_ra_sc_gam = ((df.rate == str(rate)) | (df.rate == 0)) \
+                                & (df.prices == price) \
+                                & (df.algo == algo) \
+                                & (df.scenario == scenario) \
+                                & (df.gamma_version == gamma_version)
+        df_al_pr_ra_sc_gam = df[mask_al_pr_ra_sc_gam].copy()
+        
+        pxs_al_pr_ra_sc_gam = plot_evolution_prices_for_time(
+                                df_al_pr_ra_sc_gam, algo, rate, 
+                                price, scenario, gamma_version)
+        pxs_al_pr_ra_sc_gam.legend.click_policy="hide"
+        
+        if (algo, price, rate, scenario, gamma_version) not in dico_pxs.keys():
+            dico_pxs[(algo, price, rate, scenario, gamma_version)] \
+                = [pxs_al_pr_ra_sc_gam]
+        else:
+            dico_pxs[(algo, price, rate, scenario, gamma_version)]\
+                .append(pxs_al_pr_ra_sc_gam)
+        
+    rows_evol_RU_C_B_CC_BB = list()
+    for key, pxs_al_pr_ra_sc_gam in dico_pxs.items():
+        col_px_sts = column(pxs_al_pr_ra_sc_gam)
+        rows_evol_RU_C_B_CC_BB.append(col_px_sts)
+    rows_evol_RU_C_B_CC_BB = column(children=rows_evol_RU_C_B_CC_BB, 
+                                    sizing_mode='stretch_both')
+    return rows_evol_RU_C_B_CC_BB
+        
+        
+
+# _____________________________________________________________________________
+#
+#              evolution prices B, C, BB, CC, RU for periods ---> fin
+# _____________________________________________________________________________
+
 # _____________________________________________________________________________
 #
 #                   affichage  dans tab  ---> debut
 # _____________________________________________________________________________
 def group_plot_on_panel(df_B_C_BB_CC_RU_M, 
-                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T):
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        algos_to_show, 
+                        gamma_versions_to_show, 
+                        scenarios_to_show):
     
     cols = ["B", "C", "BB", "CC", "RU"]
     for col in cols:
@@ -1693,7 +1852,7 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
     rows_RU_C_B_CC_BB = plot_comparaison_gamma_version_all_scenarios(
                             df_B_C_BB_CC_RU_M)
     tab_compGammaVersionAllScenario = Panel(child=rows_RU_C_B_CC_BB, 
-                                 title="comparison Gamma_version all scenarios")
+                                  title="comparison Gamma_version all scenarios")
     print("comparison Gamma_version all scenarios: Terminee")
     
     rows_RU_CC_BB = plot_comparaison_gamma_version_RU(df_B_C_BB_CC_RU_M)
@@ -1711,12 +1870,23 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
     tab_dists_ts = Panel(child=rows_dists_ts, title="distribution by state")
     print("Distribution of players: TERMINEE")
     
+    rows_evol_RU_C_B_CC_BB = plot_evolution_RU_C_B_CC_BB_over_time(
+                                df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                                algos=algos_to_show, 
+                                gamma_versions=gamma_versions_to_show, 
+                                scenarios=scenarios_to_show
+                                )
+    tabs_evol_over_time = Panel(child=rows_evol_RU_C_B_CC_BB, 
+                                title="evolution C B CC BB RU over time")
+    print("evolution of gains : TERMINEE")
+    
     tabs = Tabs(tabs= [ 
                         tab_compGammaVersionRU,
                         tab_compGammaVersionBC, 
                         tab_compGammaVersionAllScenario, 
-                        tab_dists_ts
-                       ])
+                        tab_dists_ts,
+                        tabs_evol_over_time
+                        ])
     NAME_RESULT_SHOW_VARS 
     name_result_show_vars = "comparaison_RU_BCBBCC_gammaVersionV1.html"
     output_file( os.path.join(name_dir, name_result_show_vars)  )
@@ -1800,10 +1970,17 @@ if __name__ == "__main__":
     # group_plot_on_panel(
     #     df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_M, 
     #     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T)
+    
+    algos_to_show= ["LRI1"];
+    gamma_versions_to_show=[];
+    scenarios_to_show=[];
    
     group_plot_on_panel(
         df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
-        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T)
+        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
+        algos_to_show=algos_to_show,
+        gamma_versions_to_show=gamma_versions_to_show,
+        scenarios_to_show=scenarios_to_show)
    
     
     print("runtime={}".format(time.time() - ti))
