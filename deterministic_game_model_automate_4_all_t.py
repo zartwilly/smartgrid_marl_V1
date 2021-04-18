@@ -445,7 +445,8 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
     # ____          run balanced sg for all t_periods : fin           ________
     
     # __________        compute prices variables         ____________________
-    B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M \
+    B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M, \
+    B_is_M_T, C_is_M_T, BB_is_M_T, CC_is_M_T, RU_is_M_T \
         = fct_aux.compute_prices_B_C_BB_CC_RU_DET(
                 arr_pl_M_T_vars_modif=arr_pl_M_T_vars_modif, 
                 pi_sg_minus_T=pi_sg_minus_T, pi_sg_plus_T=pi_sg_plus_T, 
@@ -461,25 +462,35 @@ def determinist_balanced_player_game(arr_pl_M_T_vars_init,
                 index=False)
     
     if m_players<=22:
-        fct_aux.save_variables(path_to_save, arr_pl_M_T_vars_modif, 
-                       b0_s_T, c0_s_T, B_is_M, C_is_M, 
-                       BENs_M_T, CSTs_M_T, 
-                       BB_is_M, CC_is_M, RU_is_M, 
-                       pi_sg_minus_T, pi_sg_plus_T, 
-                       pi_0_minus_T, pi_0_plus_T,
-                       pi_hp_plus_T, pi_hp_minus_T, dico_stats_res, 
-                       algo=algo_name, 
-                       dico_best_steps=dico_mode_prof_by_players_T)
+        fct_aux.save_variables(
+            path_to_save=path_to_save, 
+            arr_pl_M_T_K_vars=arr_pl_M_T_vars_modif, 
+            b0_s_T_K=b0_s_T, c0_s_T_K=c0_s_T, 
+            B_is_M=B_is_M, C_is_M=C_is_M, B_is_M_T=B_is_M_T, C_is_M_T=C_is_M_T,
+            BENs_M_T_K=BENs_M_T, CSTs_M_T_K=CSTs_M_T, 
+            BB_is_M=BB_is_M, CC_is_M=CC_is_M, RU_is_M=RU_is_M, 
+            BB_is_M_T=BB_is_M_T, CC_is_M_T=CC_is_M_T, RU_is_M_T=RU_is_M_T,
+            pi_sg_minus_T_K=pi_sg_minus_T, pi_sg_plus_T_K=pi_sg_plus_T, 
+            pi_0_minus_T_K=pi_0_minus_T, pi_0_plus_T_K=pi_0_plus_T,
+            pi_hp_plus_T=pi_hp_plus_T, pi_hp_minus_T=pi_hp_minus_T, 
+            dico_stats_res=dico_stats_res, 
+            algo=algo_name, 
+            dico_best_steps=dico_mode_prof_by_players_T)
     else:
-        fct_aux.save_variables(path_to_save, arr_pl_M_T_vars_modif, 
-                    b0_s_T, c0_s_T, B_is_M, C_is_M, 
-                    BENs_M_T, CSTs_M_T, 
-                    BB_is_M, CC_is_M, RU_is_M, 
-                    pi_sg_minus_T, pi_sg_plus_T, 
-                    pi_0_minus_T, pi_0_plus_T,
-                    pi_hp_plus_T, pi_hp_minus_T, dico_stats_res, 
-                    algo=algo_name, 
-                    dico_best_steps=dico_mode_prof_by_players_T)
+        fct_aux.save_variables(
+            path_to_save=path_to_save, 
+            arr_pl_M_T_K_vars=arr_pl_M_T_vars_modif, 
+            b0_s_T_K=b0_s_T, c0_s_T_K=c0_s_T, 
+            B_is_M=B_is_M, C_is_M=C_is_M, B_is_M_T=B_is_M_T, C_is_M_T=C_is_M_T,
+            BENs_M_T_K=BENs_M_T, CSTs_M_T_K=CSTs_M_T, 
+            BB_is_M=BB_is_M, CC_is_M=CC_is_M, RU_is_M=RU_is_M, 
+            BB_is_M_T=BB_is_M_T, CC_is_M_T=CC_is_M_T, RU_is_M_T=RU_is_M_T,
+            pi_sg_minus_T_K=pi_sg_minus_T, pi_sg_plus_T_K=pi_sg_plus_T, 
+            pi_0_minus_T_K=pi_0_minus_T, pi_0_plus_T_K=pi_0_plus_T,
+            pi_hp_plus_T=pi_hp_plus_T, pi_hp_minus_T=pi_hp_minus_T, 
+            dico_stats_res=dico_stats_res, 
+            algo=algo_name, 
+            dico_best_steps=dico_mode_prof_by_players_T)
         
         
     # _____         checkout prices from computing variables: debut      _____7

@@ -1462,7 +1462,8 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
     # ____          run balanced sg for all t_periods : fin           ________
     
     # __________         compute prices variables: debut          _____________
-    B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M \
+    B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M, \
+    B_is_M_T, C_is_M_T, BB_is_M_T, CC_is_M_T, RU_is_M_T \
         = compute_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif, 
                                         dico_k_stop_learnings,
                                         pi_sg_minus_T, pi_sg_plus_T, 
@@ -1478,14 +1479,21 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
                 *[path_to_save,
                   "resume_verify_Nash_equilibrium_{}.xlsx".format(algo_name)]), 
                 index=False )
-    fct_aux.save_variables(path_to_save, arr_pl_M_T_K_vars_modif, 
-            b0_s_T_K, c0_s_T_K, B_is_M, C_is_M, BENs_M_T_K, CSTs_M_T_K, 
-            BB_is_M, CC_is_M, RU_is_M, 
-            pi_sg_minus_T, pi_sg_plus_T, 
-            pi_0_minus_T, pi_0_plus_T,
-            pi_hp_plus_T, pi_hp_minus_T, dico_stats_res, 
+    fct_aux.save_variables(
+            path_to_save=path_to_save, 
+            arr_pl_M_T_K_vars=arr_pl_M_T_K_vars_modif, 
+            b0_s_T_K=b0_s_T_K, c0_s_T_K=c0_s_T_K, 
+            B_is_M=B_is_M, C_is_M=C_is_M, B_is_M_T=B_is_M_T, C_is_M_T=C_is_M_T,
+            BENs_M_T_K=BENs_M_T_K, CSTs_M_T_K=CSTs_M_T_K, 
+            BB_is_M=BB_is_M, CC_is_M=CC_is_M, RU_is_M=RU_is_M, 
+            BB_is_M_T=BB_is_M_T, CC_is_M_T=CC_is_M_T, RU_is_M_T=RU_is_M_T,
+            pi_sg_minus_T_K=pi_sg_minus_T, pi_sg_plus_T_K=pi_sg_plus_T, 
+            pi_0_minus_T_K=pi_0_minus_T, pi_0_plus_T_K=pi_0_plus_T,
+            pi_hp_plus_T=pi_hp_plus_T, pi_hp_minus_T=pi_hp_minus_T, 
+            dico_stats_res=dico_stats_res, 
             algo=algo_name, 
             dico_best_steps=dico_k_stop_learnings)
+    
     turn_dico_stats_res_into_df_LRI(
             arr_pl_M_T_K_vars_modif = arr_pl_M_T_K_vars_modif, 
             t_periods = t_periods,
@@ -1570,7 +1578,8 @@ def compute_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif,
     CC_is_M = np.sum(CC_is_MT, axis=1)
     RU_is_M = np.sum(RU_is_MT, axis=1)
     
-    return B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M
+    return B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M, \
+           B_is_MT, C_is_MT, BB_is_MT, CC_is_MT, RU_is_MT
 # _____             compute prices B C BB CC RU ---> fin                 _____
 
 

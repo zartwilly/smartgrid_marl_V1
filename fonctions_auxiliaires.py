@@ -708,7 +708,8 @@ def compute_prices_B_C_BB_CC_RU_DET(arr_pl_M_T_vars_modif,
     CC_is_M = np.sum(CC_is_MT, axis=1)
     RU_is_M = np.sum(RU_is_MT, axis=1)
     
-    return B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M
+    return B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M, \
+            B_is_MT, C_is_MT, BB_is_MT, CC_is_MT, RU_is_MT
 # _____             compute prices B C BB CC RU ---> fin                 _____
 
 # _____         checkout prices from computing variables ---> debut      _____
@@ -776,12 +777,13 @@ def checkout_prices_B_C_BB_CC_RU_DET(arr_pl_M_T_vars_modif,
                                      path_to_save):
     
     print("path_to_save={}".format(path_to_save) )
+    
     # read from hard disk
     arr_pl_M_T_vars, \
     b0_s_T, c0_s_T, \
-    B_is_M, C_is_M, \
-    BENs_M_T, CSTs_M_T, \
-    BB_is_M, CC_is_M, RU_is_M, \
+    B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
+    BENs_M_T_K, CSTs_M_T_K, \
+    BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
     pi_sg_plus_T, pi_sg_minus_T, \
     pi_0_plus_T, pi_0_minus_T, \
     pi_hp_plus_T, pi_hp_minus_T \
@@ -805,12 +807,12 @@ def checkout_prices_B_C_BB_CC_RU_DET(arr_pl_M_T_vars_modif,
 ###############################################################################
 def save_variables(path_to_save, arr_pl_M_T_K_vars, 
                    b0_s_T_K, c0_s_T_K,
-                   B_is_M, C_is_M, 
+                   B_is_M, C_is_M, B_is_M_T, C_is_M_T,
                    BENs_M_T_K, CSTs_M_T_K, 
-                   BB_is_M, CC_is_M, RU_is_M, 
+                   BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T, 
                    pi_sg_minus_T_K, pi_sg_plus_T_K, 
                    pi_0_minus_T_K, pi_0_plus_T_K,
-                   pi_hp_plus_s, pi_hp_minus_s, dico_stats_res,
+                   pi_hp_plus_T, pi_hp_minus_T, dico_stats_res,
                    algo="LRI",
                    dico_best_steps=dict()):
     
@@ -838,17 +840,26 @@ def save_variables(path_to_save, arr_pl_M_T_K_vars,
     np.save(os.path.join(path_to_save, "c0_s_T_K.npy"), c0_s_T_K)
     np.save(os.path.join(path_to_save, "B_is_M.npy"), B_is_M)
     np.save(os.path.join(path_to_save, "C_is_M.npy"), C_is_M)
+    
+    np.save(os.path.join(path_to_save, "B_is_M_T.npy"), B_is_M_T)
+    np.save(os.path.join(path_to_save, "C_is_M_T.npy"), C_is_M_T)
+    
     np.save(os.path.join(path_to_save, "BENs_M_T_K.npy"), BENs_M_T_K)
     np.save(os.path.join(path_to_save, "CSTs_M_T_K.npy"), CSTs_M_T_K)
     np.save(os.path.join(path_to_save, "BB_is_M.npy"), BB_is_M)
     np.save(os.path.join(path_to_save, "CC_is_M.npy"), CC_is_M)
     np.save(os.path.join(path_to_save, "RU_is_M.npy"), RU_is_M)
+    
+    np.save(os.path.join(path_to_save, "BB_is_M_T.npy"), BB_is_M_T)
+    np.save(os.path.join(path_to_save, "CC_is_M_T.npy"), CC_is_M_T)
+    np.save(os.path.join(path_to_save, "RU_is_M_T.npy"), RU_is_M_T)
+    
     np.save(os.path.join(path_to_save, "pi_sg_minus_T_K.npy"), pi_sg_minus_T_K)
     np.save(os.path.join(path_to_save, "pi_sg_plus_T_K.npy"), pi_sg_plus_T_K)
     np.save(os.path.join(path_to_save, "pi_0_minus_T_K.npy"), pi_0_minus_T_K)
     np.save(os.path.join(path_to_save, "pi_0_plus_T_K.npy"), pi_0_plus_T_K)
-    np.save(os.path.join(path_to_save, "pi_hp_plus_s.npy"), pi_hp_plus_s)
-    np.save(os.path.join(path_to_save, "pi_hp_minus_s.npy"), pi_hp_minus_s)
+    np.save(os.path.join(path_to_save, "pi_hp_plus_T.npy"), pi_hp_plus_T)
+    np.save(os.path.join(path_to_save, "pi_hp_minus_T.npy"), pi_hp_minus_T)
     pd.DataFrame.from_dict(dico_stats_res)\
         .to_csv(os.path.join(path_to_save, "stats_res.csv"))
     pd.DataFrame.from_dict(dico_best_steps)\
@@ -929,6 +940,10 @@ def get_local_storage_variables(path_to_variable):
                           allow_pickle=True)
     C_is_M = np.load(os.path.join(path_to_variable, "C_is_M.npy"),
                           allow_pickle=True)
+    B_is_M_T = np.load(os.path.join(path_to_variable, "B_is_M_T.npy"),
+                          allow_pickle=True)
+    C_is_M_T = np.load(os.path.join(path_to_variable, "C_is_M_T.npy"),
+                          allow_pickle=True)
     BENs_M_T_K = np.load(os.path.join(path_to_variable, "BENs_M_T_K.npy"),
                           allow_pickle=True)
     CSTs_M_T_K = np.load(os.path.join(path_to_variable, "CSTs_M_T_K.npy"),
@@ -939,6 +954,12 @@ def get_local_storage_variables(path_to_variable):
                           allow_pickle=True)
     RU_is_M = np.load(os.path.join(path_to_variable, "RU_is_M.npy"),
                           allow_pickle=True)
+    BB_is_M_T = np.load(os.path.join(path_to_variable, "BB_is_M_T.npy"),
+                          allow_pickle=True)
+    CC_is_M_T = np.load(os.path.join(path_to_variable, "CC_is_M_T.npy"),
+                          allow_pickle=True)
+    RU_is_M_T = np.load(os.path.join(path_to_variable, "RU_is_M_T.npy"),
+                          allow_pickle=True)
     pi_sg_plus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_plus_T_K.npy"),
                           allow_pickle=True)
     pi_sg_minus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_minus_T_K.npy"),
@@ -947,19 +968,19 @@ def get_local_storage_variables(path_to_variable):
                           allow_pickle=True)
     pi_0_minus_T_K = np.load(os.path.join(path_to_variable, "pi_0_minus_T_K.npy"),
                           allow_pickle=True)
-    pi_hp_plus_s = np.load(os.path.join(path_to_variable, "pi_hp_plus_s.npy"),
+    pi_hp_plus_T = np.load(os.path.join(path_to_variable, "pi_hp_plus_T.npy"),
                           allow_pickle=True)
-    pi_hp_minus_s = np.load(os.path.join(path_to_variable, "pi_hp_minus_s.npy"),
+    pi_hp_minus_T = np.load(os.path.join(path_to_variable, "pi_hp_minus_T.npy"),
                           allow_pickle=True)
     
     return arr_pl_M_T_K_vars, \
             b0_s_T_K, c0_s_T_K, \
-            B_is_M, C_is_M, \
+            B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
             BENs_M_T_K, CSTs_M_T_K, \
-            BB_is_M, CC_is_M, RU_is_M, \
+            BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
             pi_sg_plus_T_K, pi_sg_minus_T_K, \
             pi_0_plus_T_K, pi_0_minus_T_K, \
-            pi_hp_plus_s, pi_hp_minus_s
+            pi_hp_plus_T, pi_hp_minus_T
             
 ############################################################################### 
 #               
