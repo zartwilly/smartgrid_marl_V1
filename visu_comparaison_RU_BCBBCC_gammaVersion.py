@@ -85,72 +85,81 @@ algos_4_showing=["DETERMINIST", "LRI1", "LRI2",
 #               
 #        get local variables and turn them into dataframe --> debut
 # _____________________________________________________________________________
-def get_local_storage_variables(path_to_variable):
-    """
-    obtain the content of variables stored locally .
+# def get_local_storage_variables(path_to_variable):
+#     """
+#     obtain the content of variables stored locally .
 
-    Returns
-    -------
-     arr_pls_M_T, RUs, B0s, C0s, BENs, CSTs, pi_sg_plus_s, pi_sg_minus_s.
+#     Returns
+#     -------
+#      arr_pls_M_T, RUs, B0s, C0s, BENs, CSTs, pi_sg_plus_s, pi_sg_minus_s.
     
-    arr_pls_M_T: array of players with a shape M_PLAYERS*T_PERIODS*INDEX_ATTRS
-    arr_T_nsteps_vars : array of players with a shape 
-                        M_PLAYERS*T_PERIODS*NSTEPS*vars_nstep
-                        avec len(vars_nstep)=20
-    RUs: array of (M_PLAYERS,)
-    BENs: array of M_PLAYERS*T_PERIODS
-    CSTs: array of M_PLAYERS*T_PERIODS
-    B0s: array of (T_PERIODS,)
-    C0s: array of (T_PERIODS,)
-    pi_sg_plus_s: array of (T_PERIODS,)
-    pi_sg_minus_s: array of (T_PERIODS,)
+#     arr_pls_M_T: array of players with a shape M_PLAYERS*T_PERIODS*INDEX_ATTRS
+#     arr_T_nsteps_vars : array of players with a shape 
+#                         M_PLAYERS*T_PERIODS*NSTEPS*vars_nstep
+#                         avec len(vars_nstep)=20
+#     RUs: array of (M_PLAYERS,)
+#     BENs: array of M_PLAYERS*T_PERIODS
+#     CSTs: array of M_PLAYERS*T_PERIODS
+#     B0s: array of (T_PERIODS,)
+#     C0s: array of (T_PERIODS,)
+#     pi_sg_plus_s: array of (T_PERIODS,)
+#     pi_sg_minus_s: array of (T_PERIODS,)
 
-    pi_hp_plus_s: array of (T_PERIODS,)
-    pi_hp_minus_s: array of (T_PERIODS,)
-    """
+#     pi_hp_plus_s: array of (T_PERIODS,)
+#     pi_hp_minus_s: array of (T_PERIODS,)
+#     """
 
-    arr_pl_M_T_K_vars = np.load(os.path.join(path_to_variable, 
-                                             "arr_pl_M_T_K_vars.npy"),
-                          allow_pickle=True)
-    b0_s_T_K = np.load(os.path.join(path_to_variable, "b0_s_T_K.npy"),
-                          allow_pickle=True)
-    c0_s_T_K = np.load(os.path.join(path_to_variable, "c0_s_T_K.npy"),
-                          allow_pickle=True)
-    B_is_M = np.load(os.path.join(path_to_variable, "B_is_M.npy"),
-                          allow_pickle=True)
-    C_is_M = np.load(os.path.join(path_to_variable, "C_is_M.npy"),
-                          allow_pickle=True)
-    BENs_M_T_K = np.load(os.path.join(path_to_variable, "BENs_M_T_K.npy"),
-                          allow_pickle=True)
-    CSTs_M_T_K = np.load(os.path.join(path_to_variable, "CSTs_M_T_K.npy"),
-                          allow_pickle=True)
-    BB_is_M = np.load(os.path.join(path_to_variable, "BB_is_M.npy"),
-                          allow_pickle=True)
-    CC_is_M = np.load(os.path.join(path_to_variable, "CC_is_M.npy"),
-                          allow_pickle=True)
-    RU_is_M = np.load(os.path.join(path_to_variable, "RU_is_M.npy"),
-                          allow_pickle=True)
-    pi_sg_plus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_plus_T_K.npy"),
-                          allow_pickle=True)
-    pi_sg_minus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_minus_T_K.npy"),
-                          allow_pickle=True)
-    pi_0_plus_T_K = np.load(os.path.join(path_to_variable, "pi_0_plus_T_K.npy"),
-                          allow_pickle=True)
-    pi_0_minus_T_K = np.load(os.path.join(path_to_variable, "pi_0_minus_T_K.npy"),
-                          allow_pickle=True)
-    pi_hp_plus_s = np.load(os.path.join(path_to_variable, "pi_hp_plus_s.npy"),
-                          allow_pickle=True)
-    pi_hp_minus_s = np.load(os.path.join(path_to_variable, "pi_hp_minus_s.npy"),
-                          allow_pickle=True)
+#     arr_pl_M_T_K_vars = np.load(os.path.join(path_to_variable, 
+#                                              "arr_pl_M_T_K_vars.npy"),
+#                           allow_pickle=True)
+#     b0_s_T_K = np.load(os.path.join(path_to_variable, "b0_s_T_K.npy"),
+#                           allow_pickle=True)
+#     c0_s_T_K = np.load(os.path.join(path_to_variable, "c0_s_T_K.npy"),
+#                           allow_pickle=True)
+#     B_is_M = np.load(os.path.join(path_to_variable, "B_is_M.npy"),
+#                           allow_pickle=True)
+#     C_is_M = np.load(os.path.join(path_to_variable, "C_is_M.npy"),
+#                           allow_pickle=True)
+#     BENs_M_T_K = np.load(os.path.join(path_to_variable, "BENs_M_T_K.npy"),
+#                           allow_pickle=True)
+#     CSTs_M_T_K = np.load(os.path.join(path_to_variable, "CSTs_M_T_K.npy"),
+#                           allow_pickle=True)
+#     BB_is_M = np.load(os.path.join(path_to_variable, "BB_is_M.npy"),
+#                           allow_pickle=True)
+#     CC_is_M = np.load(os.path.join(path_to_variable, "CC_is_M.npy"),
+#                           allow_pickle=True)
+#     RU_is_M = np.load(os.path.join(path_to_variable, "RU_is_M.npy"),
+#                           allow_pickle=True)
+#     pi_sg_plus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_plus_T_K.npy"),
+#                           allow_pickle=True)
+#     pi_sg_minus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_minus_T_K.npy"),
+#                           allow_pickle=True)
+#     pi_0_plus_T_K = np.load(os.path.join(path_to_variable, "pi_0_plus_T_K.npy"),
+#                           allow_pickle=True)
+#     pi_0_minus_T_K = np.load(os.path.join(path_to_variable, "pi_0_minus_T_K.npy"),
+#                           allow_pickle=True)
+#     pi_hp_plus_s = np.load(os.path.join(path_to_variable, "pi_hp_plus_s.npy"),
+#                           allow_pickle=True)
+#     pi_hp_minus_s = np.load(os.path.join(path_to_variable, "pi_hp_minus_s.npy"),
+#                           allow_pickle=True)
     
-    return arr_pl_M_T_K_vars, \
-            b0_s_T_K, c0_s_T_K, \
-            B_is_M, C_is_M, \
-            BENs_M_T_K, CSTs_M_T_K, \
-            BB_is_M, CC_is_M, RU_is_M, \
-            pi_sg_plus_T_K, pi_sg_minus_T_K, \
-            pi_0_plus_T_K, pi_0_minus_T_K, \
-            pi_hp_plus_s, pi_hp_minus_s
+#     return arr_pl_M_T_K_vars, \
+#             b0_s_T_K, c0_s_T_K, \
+#             B_is_M, C_is_M, \
+#             BENs_M_T_K, CSTs_M_T_K, \
+#             BB_is_M, CC_is_M, RU_is_M, \
+#             pi_sg_plus_T_K, pi_sg_minus_T_K, \
+#             pi_0_plus_T_K, pi_0_minus_T_K, \
+#             pi_hp_plus_s, pi_hp_minus_s
+            
+#             arr_pl_M_T_K_vars, \
+#             b0_s_T_K, c0_s_T_K, \
+#             B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
+#             BENs_M_T_K, CSTs_M_T_K, \
+#             BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
+#             pi_sg_plus_T_K, pi_sg_minus_T_K, \
+#             pi_0_plus_T_K, pi_0_minus_T_K, \
+#             pi_hp_plus_T, pi_hp_minus_T
             
             
 def get_tuple_paths_of_arrays(name_dirs=["tests"], nb_sub_dir=1,
@@ -350,22 +359,24 @@ def DBG_get_array_turn_df_for_t(tuple_path_det_scen1, t=1, k_steps_args=250, nb_
     
     algo_name = tuple_path_det_scen1[nb_sub_dir+2]
     path_to_variable = os.path.join(*tuple_path_det_scen1)
+    
     arr_pl_M_T_K_vars, \
     b0_s_T_K, c0_s_T_K, \
-    B_is_M, C_is_M, \
+    B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
     BENs_M_T_K, CSTs_M_T_K, \
-    BB_is_M, CC_is_M, RU_is_M, \
+    BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
     pi_sg_plus_T, pi_sg_minus_T, \
     pi_0_plus_T, pi_0_minus_T, \
-    pi_hp_plus_s, pi_hp_minus_s \
-        = get_local_storage_variables(path_to_variable)
+    pi_hp_plus_T, pi_hp_minus_T \
+        = fct_aux.get_local_storage_variables(
+            path_to_variable=path_to_variable)
         
     return algo_name, \
             arr_pl_M_T_K_vars, \
             b0_s_T_K, c0_s_T_K, \
-            B_is_M, C_is_M, \
+            B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
             BENs_M_T_K, CSTs_M_T_K, \
-            BB_is_M, CC_is_M, RU_is_M, \
+            BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
             pi_sg_plus_T, pi_sg_minus_T, \
             pi_0_plus_T, pi_0_minus_T
     
@@ -699,16 +710,19 @@ def get_array_turn_df_for_t(tuple_paths, df_LRI_12_stop,
     for tuple_path in tuple_paths:
         algo_name = tuple_path[nb_sub_dir+2]
         path_to_variable = os.path.join(*tuple_path)
+        
         arr_pl_M_T_K_vars, \
         b0_s_T_K, c0_s_T_K, \
-        B_is_M, C_is_M, \
+        B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
         BENs_M_T_K, CSTs_M_T_K, \
-        BB_is_M, CC_is_M, RU_is_M, \
+        BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
         pi_sg_plus_T, pi_sg_minus_T, \
         pi_0_plus_T, pi_0_minus_T, \
-        pi_hp_plus_s, pi_hp_minus_s \
-            = get_local_storage_variables(path_to_variable)
-            
+        pi_hp_plus_T, pi_hp_minus_T \
+            = fct_aux.get_local_storage_variables(
+                path_to_variable=path_to_variable)
+        
+    
         price = tuple_path[nb_sub_dir+1].split("_")[3] \
                 +"_"+tuple_path[nb_sub_dir+1].split("_")[-1]
         algo_name = tuple_path[nb_sub_dir+2];
@@ -721,16 +735,20 @@ def get_array_turn_df_for_t(tuple_paths, df_LRI_12_stop,
         #        + ["k_stop", "PROD", "CONS", "b0", "c0", 
         #           "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU"]
         arr_pl_M_T_KSTOP_vars, AUTOMATE_INDEX_ATTRS_NEW \
-            = add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
-                                 df_LRI_12_stop,
-                                 arr_pl_M_T_K_vars,
-                                 b0_s_T_K, c0_s_T_K,
-                                 B_is_M, C_is_M,
-                                 BENs_M_T_K, CSTs_M_T_K,
-                                 BB_is_M, CC_is_M, RU_is_M,
-                                 pi_sg_plus_T, pi_sg_minus_T,
-                                 pi_0_plus_T, pi_0_minus_T, 
-                                 algos_4_no_learning)
+            = add_new_vars_2_arr(
+                algo_name=algo_name, 
+                scenario_name=scenario_name, 
+                gamma_version=gamma_version,
+                df_LRI_12_kstop=df_LRI_12_stop,
+                arr_pl_M_T_K_vars=arr_pl_M_T_K_vars,
+                b0_s_T_K=b0_s_T_K, c0_s_T_K=c0_s_T_K,
+                B_is_M=B_is_M, C_is_M=C_is_M, B_is_M_T=B_is_M_T, C_is_M_T=C_is_M_T,
+                BENs_M_T_K=BENs_M_T_K, CSTs_M_T_K=CSTs_M_T_K,
+                BB_is_M=BB_is_M, CC_is_M=CC_is_M, RU_is_M=RU_is_M,
+                BB_is_M_T=BB_is_M_T, CC_is_M_T=CC_is_M_T, RU_is_M_T=RU_is_M_T,
+                pi_sg_plus_T=pi_sg_plus_T, pi_sg_minus_T=pi_sg_minus_T,
+                pi_0_plus_T=pi_0_plus_T, pi_0_minus_T=pi_0_minus_T, 
+                algos_4_no_learning=algos_4_no_learning)
         
         m_players = arr_pl_M_T_K_vars.shape[0]
         k_steps = arr_pl_M_T_K_vars.shape[2] if arr_pl_M_T_K_vars.shape == 4 \
@@ -848,9 +866,9 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
                        df_LRI_12_kstop,
                        arr_pl_M_T_K_vars,
                        b0_s_T_K, c0_s_T_K,
-                       B_is_M, C_is_M,
+                       B_is_M, C_is_M, B_is_M_T, C_is_M_T,
                        BENs_M_T_K, CSTs_M_T_K,
-                       BB_is_M, CC_is_M, RU_is_M,
+                       BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,
                        pi_sg_plus_T, pi_sg_minus_T,
                        pi_0_plus_T, pi_0_minus_T, 
                        algos_4_no_learning=["DETERMINIST","RD-DETERMINIST",
@@ -858,6 +876,7 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
                                              "BAD-BRUTE-FORCE", 
                                              "MIDDLE-BRUTE-FORCE"]):
     """
+    Version compute B,BB, C, CC
     add new variables to array of players  --> debut
                    pi_sg_{+,-}, b0, c0, B, C, BB, CC, RU 
     """
@@ -893,6 +912,15 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
             k_stop = df_LRI_12_stop.loc[index_kstop, str(t)]
             arr_pl_M_T_KSTOP_vars[:,t,list(fct_aux.AUTOMATE_INDEX_ATTRS.values()) ] \
                 = arr_pl_M_T_K_vars[:,t,k_stop,:]
+            
+            
+        # index_kstop = scenario_name+"_"+gamma_version+"_"+algo_name+"_"+"k_stop"
+        # k_stop = df_LRI_12_stop.loc[index_kstop, str(t)]
+        # arr_pl_M_T_KSTOP_vars[:,t,list(fct_aux.AUTOMATE_INDEX_ATTRS.values()) ] \
+        #     = arr_pl_M_T_K_vars[:,t,:] \
+        #         if algo_name in algos_4_no_learning \
+        #         else arr_pl_M_T_K_vars[:,t,k_stop,:]
+                
                 
         b0_t, c0_t = None, None
         b0_0_t_minus_1, c0_0_t_minus_1 = None, None
@@ -936,15 +964,15 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
             CCi_0_t_minus_1 = pi_sg_minus_t * CONS_i
             RUi_0_t_minus_1 = BBi_0_t_minus_1 - CCi_0_t_minus_1
             arr_pl_M_T_KSTOP_vars[num_pl_i, t,
-                                  AUTOMATE_INDEX_ATTRS_NEW["B"]] = B_is_M[num_pl_i]
+                                  AUTOMATE_INDEX_ATTRS_NEW["B"]] = B_is_M_T[num_pl_i, t]
             arr_pl_M_T_KSTOP_vars[num_pl_i, t,
-                                  AUTOMATE_INDEX_ATTRS_NEW["C"]] = C_is_M[num_pl_i]
+                                  AUTOMATE_INDEX_ATTRS_NEW["C"]] = C_is_M_T[num_pl_i, t]
             arr_pl_M_T_KSTOP_vars[num_pl_i, t,
-                                  AUTOMATE_INDEX_ATTRS_NEW["BB"]] = BB_is_M[num_pl_i]
+                                  AUTOMATE_INDEX_ATTRS_NEW["BB"]] = BB_is_M_T[num_pl_i, t]
             arr_pl_M_T_KSTOP_vars[num_pl_i, t,
-                                  AUTOMATE_INDEX_ATTRS_NEW["CC"]] = CC_is_M[num_pl_i]
+                                  AUTOMATE_INDEX_ATTRS_NEW["CC"]] = CC_is_M_T[num_pl_i, t]
             arr_pl_M_T_KSTOP_vars[num_pl_i, t,
-                                  AUTOMATE_INDEX_ATTRS_NEW["RU"]] = RU_is_M[num_pl_i]
+                                  AUTOMATE_INDEX_ATTRS_NEW["RU"]] = RU_is_M_T[num_pl_i, t]
             
             arr_pl_M_T_KSTOP_vars[num_pl_i, t,
                                   AUTOMATE_INDEX_ATTRS_NEW["b0"]] = b0_t
@@ -984,7 +1012,7 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
     print("BBis OK?: {}, CCis OK?: {}, RUis OK?: {},".format(
             round(cpt_BB_OK/cpt, 2), round(cpt_CC_OK/cpt, 2), 
             round(cpt_RU_OK/cpt, 2)))
-                      
+            
     return arr_pl_M_T_KSTOP_vars, AUTOMATE_INDEX_ATTRS_NEW
 
 def add_new_vars_2_arr_OLD_VERSION(algo_name, scenario_name, gamma_version,
@@ -1677,7 +1705,7 @@ def plot_distribution_by_states_4_periods(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M
 #
 #              evolution prices B, C, BB, CC, RU for periods ---> debut
 # _____________________________________________________________________________
-def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate, 
+def OLD_plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate, 
                                    price, scenario, gamma_version):
     
     cols = ["t", "B", "C", "BB", "CC", "RU"]
@@ -1769,6 +1797,117 @@ def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate,
     px.yaxis.axis_label = "values"
     
     return px
+
+
+def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate, 
+                                   price, scenario, gamma_version):
+    
+    cols = ["t", "B", "C", "BB", "CC", "RU"]
+    
+    df_res_t = df_al_pr_ra_sc_gam.groupby(cols[0])[cols[1:]]\
+                .agg({cols[1]:[np.mean, np.std, np.min, np.max], 
+                      cols[2]:[np.mean, np.std, np.min, np.max], 
+                      cols[3]:[np.mean, np.std, np.min, np.max], 
+                      cols[4]:[np.mean, np.std, np.min, np.max], 
+                      cols[5]:[np.mean, np.std, np.min, np.max]})
+    
+    df_res_t.columns = ["_".join(x) for x in df_res_t.columns.ravel()]
+    df_res_t = df_res_t.reset_index()
+    
+    df_res_t.t = df_res_t.t.astype("str")
+    
+    aggs = ["amin", "amax", "std", "mean"]
+    tooltips = [("{}_{}".format(col, agg), "@{}_{}".format(col, agg)) 
+                for (col, agg) in it.product(cols[1:], aggs)]
+    TOOLS[7] = HoverTool(tooltips = tooltips)
+    
+    new_cols = [col[1].split("@")[1] 
+                for col in tooltips if col[1].split("_")[1] == "mean"]
+    print('new_cols={}, df_res_t.cols={}'.format(new_cols, df_res_t.columns))
+    
+    x = list(map(tuple,list(df_res_t.t.values)))
+    px = figure(x_range=df_res_t.t.values.tolist(), 
+                y_range=(0, df_res_t[new_cols].values.max() + 5), 
+                plot_height = int(350), 
+                plot_width = int(WIDTH*MULT_WIDTH), tools = TOOLS, 
+                toolbar_location="above")
+           
+    data = dict(x = df_res_t.t.values.tolist(), 
+                B_mean=df_res_t.B_mean.tolist(), 
+                C_mean=df_res_t.C_mean.tolist(), 
+                BB_mean=df_res_t.BB_mean.tolist(), 
+                CC_mean=df_res_t.CC_mean.tolist(), 
+                RU_mean=df_res_t.RU_mean.tolist(), 
+                B_std=df_res_t.B_std.tolist(), 
+                C_std=df_res_t.C_std.tolist(), 
+                BB_std=df_res_t.BB_std.tolist(), 
+                CC_std=df_res_t.CC_std.tolist(), 
+                RU_std=df_res_t.RU_std.tolist(),
+                B_amin=df_res_t.B_amin.tolist(), 
+                C_amin=df_res_t.C_amin.tolist(), 
+                BB_amin=df_res_t.BB_amin.tolist(), 
+                CC_amin=df_res_t.CC_amin.tolist(), 
+                RU_amin=df_res_t.RU_amin.tolist(), 
+                B_amax=df_res_t.B_amax.tolist(), 
+                C_amax=df_res_t.C_amax.tolist(), 
+                BB_amax=df_res_t.BB_amax.tolist(), 
+                CC_amax=df_res_t.CC_amax.tolist(), 
+                RU_amax=df_res_t.RU_amax.tolist()
+                )
+
+    print("data keys={}".format(data.keys()))
+    source = ColumnDataSource(data = data)
+    
+    width= 0.1 #0.5
+    # px.vbar(x='x', top=new_cols[4], width=0.9, source=source, color="#c9d9d3")
+            
+    # px.vbar(x='x', top=new_cols[0], width=0.9, source=source, color="#718dbf")
+    
+    px.vbar(x=dodge('x', -0.3+0*width, range=px.x_range), top=new_cols[0], 
+                    width=width, source=source, legend_label=new_cols[0], 
+                    color="#c9d9d3")
+    px.vbar(x=dodge('x', -0.3+1*width, range=px.x_range), top=new_cols[1], 
+                    width=width, source=source, legend_label=new_cols[1], 
+                    color="#718dbf")
+    px.vbar(x=dodge('x', -0.3+2*width, range=px.x_range), top=new_cols[2], 
+                    width=width, source=source, legend_label=new_cols[2], 
+                    color="#e84d60")
+    px.vbar(x=dodge('x', -0.3+3*width, range=px.x_range), top=new_cols[3], 
+                    width=width, source=source, legend_label=new_cols[3], 
+                    color="#ddb7b1")
+    px.vbar(x=dodge('x', -0.3+4*width, range=px.x_range), top=new_cols[4], 
+                    width=width, source=source, legend_label=new_cols[4], 
+                    color="#FFD700")
+    
+    
+    # px.vbar(x=dodge('x', -0.3+0*width, range=px.x_range), top=new_cols[0], 
+    #                 width=width, source=source, legend_label=new_cols[0], 
+    #                 color="#c9d9d3")
+    # px.vbar(x=dodge('x', -0.3+1*width, range=px.x_range), top=new_cols[1], 
+    #                 width=width, source=source, legend_label=new_cols[1], 
+    #                 color="#718dbf")
+    # px.vbar(x=dodge('x', -0.3+2*width, range=px.x_range), top=new_cols[2], 
+    #                 width=width, source=source, legend_label=new_cols[2], 
+    #                 color="#e84d60")
+    # px.vbar(x=dodge('x', -0.3+3*width, range=px.x_range), top=new_cols[3], 
+    #                 width=width, source=source, legend_label=new_cols[3], 
+    #                 color="#ddb7b1")
+    # px.vbar(x=dodge('x', -0.3+4*width, range=px.x_range), top=new_cols[4], 
+    #                 width=width, source=source, legend_label=new_cols[4], 
+    #                 color="#FFD700")
+    
+    title = "gain evolution over time ({}, {}, rate:{}, price={}, gamma_version={})".format(
+                algo, scenario, rate, price, gamma_version)
+    px.title.text = title
+    px.y_range.start = df_res_t.RU_mean.min() - 1
+    px.x_range.range_padding = width
+    px.xgrid.grid_line_color = None
+    px.legend.location = "top_right" #"top_left"
+    px.legend.orientation = "horizontal"
+    px.xaxis.axis_label = "t_periods"
+    px.yaxis.axis_label = "values"
+    
+    return px
     
 
 
@@ -1800,6 +1939,8 @@ def plot_evolution_RU_C_B_CC_BB_over_time(
                                 & (df.gamma_version == gamma_version)
         df_al_pr_ra_sc_gam = df[mask_al_pr_ra_sc_gam].copy()
         
+        print("{}, {}, {}, df_al_pr_ra_sc_gam={}".format(algo, 
+                scenario, gamma_version, df_al_pr_ra_sc_gam.shape ))
         pxs_al_pr_ra_sc_gam = plot_evolution_prices_for_time(
                                 df_al_pr_ra_sc_gam, algo, rate, 
                                 price, scenario, gamma_version)
@@ -1893,6 +2034,42 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
     save(tabs)
     show(tabs)
     
+def DBG_group_plot_on_panel(df_B_C_BB_CC_RU_M, 
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        algos_to_show, 
+                        gamma_versions_to_show, 
+                        scenarios_to_show):
+    
+    cols = ["B", "C", "BB", "CC", "RU"]
+    for col in cols:
+        df_B_C_BB_CC_RU_M[col] = df_B_C_BB_CC_RU_M[col].astype(float)
+    
+    cols = ["PROD", "CONS", "b0", "c0", "pi_sg_plus", "pi_sg_minus", 
+            "B", "C", "BB", "CC", "RU"]
+    for col in cols:
+        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col] \
+            = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col].astype(float)
+            
+    rows_evol_RU_C_B_CC_BB = plot_evolution_RU_C_B_CC_BB_over_time(
+                                df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                                algos=algos_to_show, 
+                                gamma_versions=gamma_versions_to_show, 
+                                scenarios=scenarios_to_show
+                                )
+    tabs_evol_over_time = Panel(child=rows_evol_RU_C_B_CC_BB, 
+                                title="evolution C B CC BB RU over time")
+    print("evolution of gains : TERMINEE")
+    
+    tabs = Tabs(tabs= [ 
+                        tabs_evol_over_time
+                        ])
+    #NAME_RESULT_SHOW_VARS 
+    name_result_show_vars = "comparaison_RU_BCBBCC_gammaVersionV1.html"
+    output_file( os.path.join(name_dir, name_result_show_vars)  )
+    #save(tabs)
+    show(tabs)
+        
+
 # _____________________________________________________________________________
 #
 #                   affichage  dans tab  ---> fin
@@ -1981,6 +2158,16 @@ if __name__ == "__main__":
         algos_to_show=algos_to_show,
         gamma_versions_to_show=gamma_versions_to_show,
         scenarios_to_show=scenarios_to_show)
+    
+    # algos_to_show=["LRI1"];
+    # gamma_versions_to_show=["ammaV1"];
+    # scenarios_to_show=["scenario0"];
+    # DBG_group_plot_on_panel(
+    #     df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
+    #     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
+    #     algos_to_show=algos_to_show,
+    #     gamma_versions_to_show=gamma_versions_to_show,
+    #     scenarios_to_show=scenarios_to_show)
    
     
     print("runtime={}".format(time.time() - ti))
