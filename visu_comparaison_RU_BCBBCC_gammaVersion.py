@@ -1616,7 +1616,7 @@ def plot_comparaison_gamma_version_all_scenarios(df_B_C_BB_CC_RU_M):
 #
 #                   distribution by states for periods ---> debut
 # _____________________________________________________________________________
-def plot_distribution(df_al_pr_ra_sc, algo, rate, price, scenario):
+def plot_distribution(df_al_pr_ra_sc, algo, rate, price, scenario, gamma_version):
     """
     plot the bar plot with key is (t, stateX) (X={1,2,3})
     """
@@ -1635,8 +1635,8 @@ def plot_distribution(df_al_pr_ra_sc, algo, rate, price, scenario):
                         )
     px= figure(x_range=FactorRange(*x), 
                plot_height=350, plot_width = int(WIDTH*MULT_WIDTH),
-               title="number of players, ({}, {}, rate={}, price={})".format(
-                  algo, scenario, rate, price),
+               title="number of players, ({}, {}, {}, rate={}, price={})".format(
+                  algo, scenario, gamma_version, rate, price),
                 toolbar_location=None, tools=TOOLS)
     
 
@@ -1668,24 +1668,27 @@ def plot_distribution_by_states_4_periods(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M
     prices = df_M_T.prices.unique().tolist()
     algos = df_M_T.algo.unique().tolist()
     scenarios = df_M_T.scenario.unique().tolist()
+    gamma_versions = df_M_T.gamma_version.unique().tolist()
     
     dico_pxs = dict()
-    for algo, price, rate, scenario in it.product(algos, prices, rates, scenarios):
+    for algo, price, rate, scenario, gamma_version in it.product(algos, prices, rates, 
+                                                  scenarios, gamma_versions):
         mask_al_pr_ra_sc = ((df_M_T.rate == str(rate)) 
                                  | (df_M_T.rate == 0)) \
                             & (df_M_T.prices == price) \
                             & (df_M_T.algo == algo) \
-                            & (df_M_T.scenario == scenario)    
+                            & (df_M_T.scenario == scenario) \
+                            & (df_M_T.gamma_version == gamma_version)
         df_al_pr_ra_sc = df_M_T[mask_al_pr_ra_sc].copy()
         
         pxs_al_pr_ra_scen = plot_distribution(df_al_pr_ra_sc, algo, rate, 
-                                              price, scenario)
+                                              price, scenario, gamma_version)
         
-        if (algo, price, rate, scenario) not in dico_pxs.keys():
-            dico_pxs[(algo, price, rate, scenario)] \
+        if (algo, price, rate, scenario, gamma_version) not in dico_pxs.keys():
+            dico_pxs[(algo, price, rate, scenario, gamma_version)] \
                 = [pxs_al_pr_ra_scen]
         else:
-            dico_pxs[(algo, price, rate, scenario)].append(pxs_al_pr_ra_scen)
+            dico_pxs[(algo, price, rate, scenario, gamma_version)].append(pxs_al_pr_ra_scen)
         
     rows_dists_ts = list()
     for key, pxs_al_pr_ra_scen in dico_pxs.items():
@@ -2089,9 +2092,10 @@ if __name__ == "__main__":
         
     # name_dir = os.path.join("tests", 
     #                         "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
-    k_steps = 75#25#5
+    t_periods = 20
+    k_steps = 250 #5
     name_dir = os.path.join("tests", 
-                            "gamma_V0_V1_V2_V3_V4_T5_ksteps"+str(k_steps)+"_setACsetAB1B2C")
+                            "gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
     
     nb_sub_dir = len(name_dir.split(os.sep))
     
