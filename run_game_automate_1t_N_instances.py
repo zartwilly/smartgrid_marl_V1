@@ -28,7 +28,7 @@ if __name__ == "__main__":
     pi_hp_minus = [20] #[20] #[0.33] #[15, 5]
     fct_aux.PI_0_PLUS_INIT = 4 #20 #4
     fct_aux.PI_0_MINUS_INIT = 3 #10 #3
-    NB_INSTANCES = 50 #50
+    NB_INSTANCES = 3#50 #50
     
     algos = ["LRI1", "LRI2", "DETERMINIST"] \
             + fct_aux.ALGO_NAMES_NASH \
@@ -40,6 +40,7 @@ if __name__ == "__main__":
     setA_m_players, setB_m_players, setC_m_players = 8, 4, 4                   # 16 players
     setA_m_players, setB_m_players, setC_m_players = 6, 3, 3                   # 12 players
     scenario_name = "scenario0"
+    scenario = None
     
     name_dir = "tests"
     gamma_versions = [3] #[0,1,2,3,4]
@@ -61,6 +62,7 @@ if __name__ == "__main__":
                 = fct_aux.get_or_create_instance_Pi_Ci_one_period(
                     setA_m_players, setB_m_players, setC_m_players, 
                     t_periods, 
+                    scenario,
                     scenario_name,
                     path_to_arr_pl_M_T, used_instances)
             

@@ -75,9 +75,9 @@ RACINE_PLAYER = "player"
 
 #_________________            AUTOMATE CONSTANCES           ________________
 
-AUTOMATE_FILENAME_ARR_PLAYERS_ROOT = "arr_pl_M_T_players_setA_{}_setB_{}_setC_{}_periods_{}.npy"
-AUTOMATE_FILENAME_ARR_PLAYERS_ROOT_SETAB1B2C = "arr_pl_M_T_players_setA_{}_setB1_{}_setB2_{}_setC_{}_periods_{}.npy"
-AUTOMATE_FILENAME_ARR_PLAYERS_ROOT_SETAC = "arr_pl_M_T_players_setA_{}_setC_{}_periods_{}.npy"
+AUTOMATE_FILENAME_ARR_PLAYERS_ROOT = "arr_pl_M_T_players_setA_{}_setB_{}_setC_{}_periods_{}_{}.npy"
+AUTOMATE_FILENAME_ARR_PLAYERS_ROOT_SETAB1B2C = "arr_pl_M_T_players_setA_{}_setB1_{}_setB2_{}_setC_{}_periods_{}_{}.npy"
+AUTOMATE_FILENAME_ARR_PLAYERS_ROOT_SETAC = "arr_pl_M_T_players_setA_{}_setC_{}_periods_{}_{}.npy"
 
 
 AUTOMATE_INDEX_ATTRS = {"Ci":0, "Pi":1, "Si":2, "Si_max":3, 
@@ -1257,7 +1257,8 @@ def get_or_create_instance_Pi_Ci_etat_AUTOMATE(setA_m_players,
                                       setB_m_players, 
                                       setC_m_players, 
                                       t_periods, 
-                                      scenario,
+                                      scenario, 
+                                      scenario_name,
                                       path_to_arr_pl_M_T, used_instances):
     """
     get instance if it exists else create instance.
@@ -1307,10 +1308,10 @@ def get_or_create_instance_Pi_Ci_etat_AUTOMATE(setA_m_players,
 
     """
     arr_pl_M_T_vars = None
-    "arr_pl_M_T_players_setA_{}_setB_{}_setC_{}_periods_{}.npy"
+    "arr_pl_M_T_players_setA_{}_setB_{}_setC_{}_periods_{}_{}.npy"
     filename_arr_pl = AUTOMATE_FILENAME_ARR_PLAYERS_ROOT.format(
                         setA_m_players, setB_m_players, setC_m_players, 
-                        t_periods)
+                        t_periods, scenario_name)
     path_to_save = os.path.join(*["tests", "AUTOMATE_INSTANCES_GAMES"])
     path_to_arr_pl_M_T = os.path.join(*[path_to_arr_pl_M_T,filename_arr_pl])
     
@@ -1352,7 +1353,8 @@ def get_or_create_instance_Pi_Ci_one_period(setA_m_players,
                                       setB_m_players, 
                                       setC_m_players, 
                                       t_periods, 
-                                      scenario,
+                                      scenario, 
+                                      scenario_name,
                                       path_to_arr_pl_M_T, used_instances):
     """
     get instance if it exists else create instance.
@@ -1402,10 +1404,10 @@ def get_or_create_instance_Pi_Ci_one_period(setA_m_players,
 
     """
     arr_pl_M_T_vars = None
-    "arr_pl_M_T_players_setA_{}_setB_{}_setC_{}_periods_{}.npy"
+    "arr_pl_M_T_players_setA_{}_setB_{}_setC_{}_periods_{}_{}.npy"
     filename_arr_pl = AUTOMATE_FILENAME_ARR_PLAYERS_ROOT.format(
                         setA_m_players, setB_m_players, setC_m_players, 
-                        t_periods)
+                        t_periods, scenario_name)
     path_to_save = os.path.join(*["tests", "AUTOMATE_INSTANCES_GAMES"])
     path_to_arr_pl_M_T = os.path.join(*[path_to_arr_pl_M_T,filename_arr_pl])
     
@@ -1984,11 +1986,11 @@ def get_or_create_instance_Pi_Ci_etat_AUTOMATE_SETAB1B2C(setA_m_players,
 
     """
     arr_pl_M_T_vars = None
-    "arr_pl_M_T_players_setA_{}_setB1_{}_setB2_{}_setC_{}_periods_{}.npy"
+    "arr_pl_M_T_players_setA_{}_setB1_{}_setB2_{}_setC_{}_periods_{}_{}.npy"
     filename_arr_pl = AUTOMATE_FILENAME_ARR_PLAYERS_ROOT_SETAB1B2C.format(
                         setA_m_players, setB1_m_players, 
                         setB2_m_players, setC_m_players, 
-                        t_periods)
+                        t_periods, scenario_name)
     path_to_save = os.path.join(*["tests", "AUTOMATE_INSTANCES_GAMES"])
     path_to_arr_pl_M_T = os.path.join(*[path_to_arr_pl_M_T,filename_arr_pl])
     
@@ -2563,10 +2565,10 @@ def get_or_create_instance_Pi_Ci_etat_AUTOMATE_SETAC(setA_m_players,
 
     """
     arr_pl_M_T_vars = None
-    "arr_pl_M_T_players_setA_{}_setC_{}_periods_{}.npy"
+    "arr_pl_M_T_players_setA_{}_setC_{}_periods_{}_{}.npy"
     filename_arr_pl = AUTOMATE_FILENAME_ARR_PLAYERS_ROOT_SETAC.format(
                         setA_m_players, setC_m_players, 
-                        t_periods)
+                        t_periods, scenario_name)
     path_to_save = os.path.join(*["tests", "AUTOMATE_INSTANCES_GAMES"])
     path_to_arr_pl_M_T = os.path.join(*[path_to_arr_pl_M_T,filename_arr_pl])
     
@@ -2608,6 +2610,7 @@ def get_or_create_instance_Pi_Ci_one_period_SETAC(setA_m_players,
                                       setC_m_players, 
                                       t_periods, 
                                       scenario,
+                                      scenario_name,
                                       path_to_arr_pl_M_T, used_instances):
     """
     get instance if it exists else create instance.
@@ -2654,10 +2657,10 @@ def get_or_create_instance_Pi_Ci_one_period_SETAC(setA_m_players,
 
     """
     arr_pl_M_T_vars = None
-    "arr_pl_M_T_players_setA_{}_setC_{}_periods_{}.npy"
+    "arr_pl_M_T_players_setA_{}_setC_{}_periods_{}_{}.npy"
     filename_arr_pl = AUTOMATE_FILENAME_ARR_PLAYERS_ROOT_SETAC.format(
                         setA_m_players, setC_m_players, 
-                        t_periods)
+                        t_periods, scenario_name)
     path_to_save = os.path.join(*["tests", "AUTOMATE_INSTANCES_GAMES"])
     path_to_arr_pl_M_T = os.path.join(*[path_to_arr_pl_M_T,filename_arr_pl])
     

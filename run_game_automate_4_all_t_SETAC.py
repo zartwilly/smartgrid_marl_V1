@@ -18,11 +18,11 @@ if __name__ == "__main__":
     # _____                     scenarios --> debut                 __________
     prob_A_A = 0.6; prob_A_C = 0.4;
     prob_C_A = 0.4; prob_C_C = 0.6;
-    scenario3 = [(prob_A_A, prob_A_C), 
+    scenario0 = [(prob_A_A, prob_A_C), 
                 (prob_C_A, prob_C_C)]
     
     
-    dico_scenario = {"scenario3": scenario3}
+    dico_scenario = {"scenario0": scenario0}
     # _____                     scenarios --> fin                   __________
     
     # _____                     gamma_version --> debut             __________
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         # ---- new constances simu_DDMM_HHMM --- **** debug *****
         date_hhmm = "DDMM_HHMM"
         t_periods = 3#50 #4 #10 #30 #50 #30 #35 #55 #117 #15 #3
-        k_steps = 50#250 #250 #250 #100 #250 #5000 #2000 #50 #250
+        k_steps = 5#250 #250 #250 #100 #250 #5000 #2000 #50 #250
         NB_REPEAT_K_MAX= 10 #3 #15 #30
         learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
         fct_aux.N_DECIMALS = 8

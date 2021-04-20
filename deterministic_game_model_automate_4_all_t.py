@@ -531,6 +531,7 @@ def test_DETERMINIST_balanced_player_game_Pi_Ci_NEW_AUTOMATE():
     scenario1 = [(prob_A_A, prob_A_B, prob_A_C), 
                  (prob_B_A, prob_B_B, prob_B_C),
                  (prob_C_A, prob_C_B, prob_C_C)]
+    scenario_name = "scenario1"
     
     t_periods = 4
     setA_m_players, setB_m_players, setC_m_players = 10, 6, 5
@@ -541,6 +542,7 @@ def test_DETERMINIST_balanced_player_game_Pi_Ci_NEW_AUTOMATE():
                             setA_m_players, setB_m_players, setC_m_players, 
                             t_periods, 
                             scenario1,
+                            scenario_name,
                             path_to_arr_pl_M_T, used_instances)
     fct_aux.checkout_values_Pi_Ci_arr_pl(arr_pl_M_T_vars_init)
     
