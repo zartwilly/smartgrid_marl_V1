@@ -2152,7 +2152,7 @@ if __name__ == "__main__":
     #     df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_M, 
     #     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T)
     
-    algos_to_show= ["LRI1"];
+    algos_to_show= ["LRI1", "DETERMINIST"];
     gamma_versions_to_show=[];
     scenarios_to_show=[];
    
