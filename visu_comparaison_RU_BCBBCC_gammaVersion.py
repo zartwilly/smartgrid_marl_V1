@@ -85,83 +85,7 @@ algos_4_showing=["DETERMINIST", "LRI1", "LRI2",
 #               
 #        get local variables and turn them into dataframe --> debut
 # _____________________________________________________________________________
-# def get_local_storage_variables(path_to_variable):
-#     """
-#     obtain the content of variables stored locally .
 
-#     Returns
-#     -------
-#      arr_pls_M_T, RUs, B0s, C0s, BENs, CSTs, pi_sg_plus_s, pi_sg_minus_s.
-    
-#     arr_pls_M_T: array of players with a shape M_PLAYERS*T_PERIODS*INDEX_ATTRS
-#     arr_T_nsteps_vars : array of players with a shape 
-#                         M_PLAYERS*T_PERIODS*NSTEPS*vars_nstep
-#                         avec len(vars_nstep)=20
-#     RUs: array of (M_PLAYERS,)
-#     BENs: array of M_PLAYERS*T_PERIODS
-#     CSTs: array of M_PLAYERS*T_PERIODS
-#     B0s: array of (T_PERIODS,)
-#     C0s: array of (T_PERIODS,)
-#     pi_sg_plus_s: array of (T_PERIODS,)
-#     pi_sg_minus_s: array of (T_PERIODS,)
-
-#     pi_hp_plus_s: array of (T_PERIODS,)
-#     pi_hp_minus_s: array of (T_PERIODS,)
-#     """
-
-#     arr_pl_M_T_K_vars = np.load(os.path.join(path_to_variable, 
-#                                              "arr_pl_M_T_K_vars.npy"),
-#                           allow_pickle=True)
-#     b0_s_T_K = np.load(os.path.join(path_to_variable, "b0_s_T_K.npy"),
-#                           allow_pickle=True)
-#     c0_s_T_K = np.load(os.path.join(path_to_variable, "c0_s_T_K.npy"),
-#                           allow_pickle=True)
-#     B_is_M = np.load(os.path.join(path_to_variable, "B_is_M.npy"),
-#                           allow_pickle=True)
-#     C_is_M = np.load(os.path.join(path_to_variable, "C_is_M.npy"),
-#                           allow_pickle=True)
-#     BENs_M_T_K = np.load(os.path.join(path_to_variable, "BENs_M_T_K.npy"),
-#                           allow_pickle=True)
-#     CSTs_M_T_K = np.load(os.path.join(path_to_variable, "CSTs_M_T_K.npy"),
-#                           allow_pickle=True)
-#     BB_is_M = np.load(os.path.join(path_to_variable, "BB_is_M.npy"),
-#                           allow_pickle=True)
-#     CC_is_M = np.load(os.path.join(path_to_variable, "CC_is_M.npy"),
-#                           allow_pickle=True)
-#     RU_is_M = np.load(os.path.join(path_to_variable, "RU_is_M.npy"),
-#                           allow_pickle=True)
-#     pi_sg_plus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_plus_T_K.npy"),
-#                           allow_pickle=True)
-#     pi_sg_minus_T_K = np.load(os.path.join(path_to_variable, "pi_sg_minus_T_K.npy"),
-#                           allow_pickle=True)
-#     pi_0_plus_T_K = np.load(os.path.join(path_to_variable, "pi_0_plus_T_K.npy"),
-#                           allow_pickle=True)
-#     pi_0_minus_T_K = np.load(os.path.join(path_to_variable, "pi_0_minus_T_K.npy"),
-#                           allow_pickle=True)
-#     pi_hp_plus_s = np.load(os.path.join(path_to_variable, "pi_hp_plus_s.npy"),
-#                           allow_pickle=True)
-#     pi_hp_minus_s = np.load(os.path.join(path_to_variable, "pi_hp_minus_s.npy"),
-#                           allow_pickle=True)
-    
-#     return arr_pl_M_T_K_vars, \
-#             b0_s_T_K, c0_s_T_K, \
-#             B_is_M, C_is_M, \
-#             BENs_M_T_K, CSTs_M_T_K, \
-#             BB_is_M, CC_is_M, RU_is_M, \
-#             pi_sg_plus_T_K, pi_sg_minus_T_K, \
-#             pi_0_plus_T_K, pi_0_minus_T_K, \
-#             pi_hp_plus_s, pi_hp_minus_s
-            
-#             arr_pl_M_T_K_vars, \
-#             b0_s_T_K, c0_s_T_K, \
-#             B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
-#             BENs_M_T_K, CSTs_M_T_K, \
-#             BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
-#             pi_sg_plus_T_K, pi_sg_minus_T_K, \
-#             pi_0_plus_T_K, pi_0_minus_T_K, \
-#             pi_hp_plus_T, pi_hp_minus_T
-            
-            
 def get_tuple_paths_of_arrays(name_dirs=["tests"], nb_sub_dir=1,
                 algos_4_no_learning=["DETERMINIST","RD-DETERMINIST",
                                      "BEST-BRUTE-FORCE","BAD-BRUTE-FORCE", 
@@ -530,7 +454,7 @@ def turn_arrays_2_2D_4_not_learning_algos(arr_pl_M_T_K_vars,
                                           BB_is_M, CC_is_M, RU_is_M,
                                           pi_sg_plus_T, pi_sg_minus_T,
                                           pi_0_plus_T, pi_0_minus_T,
-                                          t_periods,
+                                          t_periods, k_steps,
                                           tu_mtk, tu_tk, tu_m, tu_mt, variables):
     arr_pl_M_T_K_vars_t = arr_pl_M_T_K_vars[:, t_periods, :]
     ## process of arr_pl_M_T_K_vars 
@@ -805,7 +729,7 @@ def get_array_turn_df_for_t(tuple_paths, df_LRI_12_stop,
                     BB_is_M, CC_is_M, RU_is_M,
                     pi_sg_plus_T, pi_sg_minus_T,
                     pi_0_plus_T, pi_0_minus_T,
-                    t_periods,
+                    t_periods, k_steps,
                     tu_mtk, tu_tk, tu_m, tu_mt, variables
                     )
                 
@@ -909,7 +833,7 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
                 = arr_pl_M_T_K_vars[:,t,:] 
         else:
             index_kstop = scenario_name+"_"+gamma_version+"_"+algo_name+"_"+"k_stop"
-            k_stop = df_LRI_12_stop.loc[index_kstop, str(t)]
+            k_stop = df_LRI_12_kstop.loc[index_kstop, str(t)]
             arr_pl_M_T_KSTOP_vars[:,t,list(fct_aux.AUTOMATE_INDEX_ATTRS.values()) ] \
                 = arr_pl_M_T_K_vars[:,t,k_stop,:]
             
@@ -1286,7 +1210,7 @@ def plot_comparaison_gamma_version_BC(df_B_C_BB_CC_RU_M):
 #                   plot RU 4 various gamma_version 4 each scenario 
 #                            --> debut
 # _____________________________________________________________________________ 
-def plot_gamma_version_RU_OLD(df_ra_pr, rate, price, scenario):
+def OLD_plot_gamma_version_RU(df_ra_pr, rate, price, scenario):
     
     cols_2_group = ["algo","gamma_version"]
     
@@ -1656,7 +1580,7 @@ def plot_distribution(df_al_pr_ra_sc, algo, rate, price, scenario, gamma_version
     
     return px
     
-def plot_distribution_by_states_4_periods(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T):
+def OLD_plot_distribution_by_states_4_periods(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T):
     """
     plot the distribution by state for each period
     plot is the bar plot with key is (t, stateX) (X={1,2,3})
@@ -1689,6 +1613,54 @@ def plot_distribution_by_states_4_periods(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M
                 = [pxs_al_pr_ra_scen]
         else:
             dico_pxs[(algo, price, rate, scenario, gamma_version)].append(pxs_al_pr_ra_scen)
+        
+    rows_dists_ts = list()
+    for key, pxs_al_pr_ra_scen in dico_pxs.items():
+        col_px_sts = column(pxs_al_pr_ra_scen)
+        rows_dists_ts.append(col_px_sts)
+    rows_dists_ts = column(children=rows_dists_ts, 
+                           sizing_mode='stretch_both')
+    return rows_dists_ts
+
+def plot_distribution_by_states_4_periods(
+        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
+        dico_SelectGammaVersion
+        ):
+    """
+    plot the distribution by state for each period
+    plot is the bar plot with key is (t, stateX) (X={1,2,3})
+    
+    """
+    df_M_T = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T.copy()
+    
+    rates = df_M_T.rate.unique(); rates = rates[rates!=0].tolist()
+    prices = df_M_T.prices.unique().tolist()
+    algos = df_M_T.algo.unique().tolist()
+    scenarios = df_M_T.scenario.unique().tolist()
+    gamma_version_root = "".join(list(df_M_T.gamma_version.unique()[0])[:-1])
+    
+    dico_pxs = dict()
+    for algo, price, rate, scenario in it.product(algos, prices, rates, 
+                                                  scenarios):
+        gamma_versions = dico_SelectGammaVersion[algo]
+        for gamma_version_number in gamma_versions:
+            gamma_version = gamma_version_root+str(gamma_version_number)
+            mask_al_pr_ra_sc = ((df_M_T.rate == str(rate)) 
+                                     | (df_M_T.rate == 0)) \
+                                & (df_M_T.prices == price) \
+                                & (df_M_T.algo == algo) \
+                                & (df_M_T.scenario == scenario) \
+                                & (df_M_T.gamma_version == gamma_version)
+            df_al_pr_ra_sc = df_M_T[mask_al_pr_ra_sc].copy()
+            
+            pxs_al_pr_ra_scen = plot_distribution(df_al_pr_ra_sc, algo, rate, 
+                                                  price, scenario, gamma_version)
+            
+            if (algo, price, rate, scenario, gamma_version) not in dico_pxs.keys():
+                dico_pxs[(algo, price, rate, scenario, gamma_version)] \
+                    = [pxs_al_pr_ra_scen]
+            else:
+                dico_pxs[(algo, price, rate, scenario, gamma_version)].append(pxs_al_pr_ra_scen)
         
     rows_dists_ts = list()
     for key, pxs_al_pr_ra_scen in dico_pxs.items():
@@ -1912,9 +1884,7 @@ def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate,
     
     return px
     
-
-
-def plot_evolution_RU_C_B_CC_BB_over_time(
+def OLD_plot_evolution_RU_C_B_CC_BB_over_time(
                     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
                     algos=["LRI1"], 
                     gamma_versions=["gammaV1"], 
@@ -1965,7 +1935,52 @@ def plot_evolution_RU_C_B_CC_BB_over_time(
     return rows_evol_RU_C_B_CC_BB
         
         
-
+def plot_evolution_RU_C_B_CC_BB_over_time(
+            df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+            algos=["LRI1"], 
+            dico_SelectGammaVersion={"DETERMINIST": [1],"LRI1": [1],"LRI2": [0]}):
+    
+    df = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T.copy()
+    
+    rates = df.rate.unique(); rates = rates[rates!=0].tolist()
+    prices = df.prices.unique().tolist()
+    scenarios = df.scenario.unique().tolist()
+    gamma_version_root = "".join(list(df.gamma_version.unique()[0])[:-1])
+    
+    dico_pxs = dict()
+    for algo, price, rate, scenario in it.product(algos, prices, 
+                                                  rates, scenarios):
+        gamma_versions = dico_SelectGammaVersion[algo]
+        for gamma_version_number in gamma_versions:
+            gamma_version = gamma_version_root+str(gamma_version_number)
+            mask_al_pr_ra_sc_gam = ((df.rate == str(rate)) | (df.rate == 0)) \
+                                    & (df.prices == price) \
+                                    & (df.algo == algo) \
+                                    & (df.scenario == scenario) \
+                                    & (df.gamma_version == gamma_version)
+            df_al_pr_ra_sc_gam = df[mask_al_pr_ra_sc_gam].copy()
+            
+            print("{}, {}, {}, df_al_pr_ra_sc_gam={}".format(algo, 
+                    scenario, gamma_version, df_al_pr_ra_sc_gam.shape ))
+            pxs_al_pr_ra_sc_gam = plot_evolution_prices_for_time(
+                                    df_al_pr_ra_sc_gam, algo, rate, 
+                                    price, scenario, gamma_version)
+            pxs_al_pr_ra_sc_gam.legend.click_policy="hide"
+            
+            if (algo, price, rate, scenario, gamma_version) not in dico_pxs.keys():
+                dico_pxs[(algo, price, rate, scenario, gamma_version)] \
+                    = [pxs_al_pr_ra_sc_gam]
+            else:
+                dico_pxs[(algo, price, rate, scenario, gamma_version)]\
+                    .append(pxs_al_pr_ra_sc_gam)
+        
+    rows_evol_RU_C_B_CC_BB = list()
+    for key, pxs_al_pr_ra_sc_gam in dico_pxs.items():
+        col_px_sts = column(pxs_al_pr_ra_sc_gam)
+        rows_evol_RU_C_B_CC_BB.append(col_px_sts)
+    rows_evol_RU_C_B_CC_BB = column(children=rows_evol_RU_C_B_CC_BB, 
+                                    sizing_mode='stretch_both')
+    return rows_evol_RU_C_B_CC_BB
 # _____________________________________________________________________________
 #
 #              evolution prices B, C, BB, CC, RU for periods ---> fin
@@ -1978,8 +1993,7 @@ def plot_evolution_RU_C_B_CC_BB_over_time(
 def group_plot_on_panel(df_B_C_BB_CC_RU_M, 
                         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
                         algos_to_show, 
-                        gamma_versions_to_show, 
-                        scenarios_to_show):
+                        dico_SelectGammaVersion):
     
     cols = ["B", "C", "BB", "CC", "RU"]
     for col in cols:
@@ -2010,15 +2024,15 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
     print("comparison Gamma_version B,C : Terminee")
     
     rows_dists_ts = plot_distribution_by_states_4_periods(
-                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T)
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        dico_SelectGammaVersion=dico_SelectGammaVersion)
     tab_dists_ts = Panel(child=rows_dists_ts, title="distribution by state")
     print("Distribution of players: TERMINEE")
     
     rows_evol_RU_C_B_CC_BB = plot_evolution_RU_C_B_CC_BB_over_time(
                                 df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
                                 algos=algos_to_show, 
-                                gamma_versions=gamma_versions_to_show, 
-                                scenarios=scenarios_to_show
+                                dico_SelectGammaVersion=dico_SelectGammaVersion
                                 )
     tabs_evol_over_time = Panel(child=rows_evol_RU_C_B_CC_BB, 
                                 title="evolution C B CC BB RU over time")
@@ -2036,12 +2050,73 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
     output_file( os.path.join(name_dir, name_result_show_vars)  )
     save(tabs)
     show(tabs)
-    
-def DBG_group_plot_on_panel(df_B_C_BB_CC_RU_M, 
+
+def OLD_group_plot_on_panel(df_B_C_BB_CC_RU_M, 
                         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
                         algos_to_show, 
                         gamma_versions_to_show, 
                         scenarios_to_show):
+    
+    cols = ["B", "C", "BB", "CC", "RU"]
+    for col in cols:
+        df_B_C_BB_CC_RU_M[col] = df_B_C_BB_CC_RU_M[col].astype(float)
+    
+    cols = ["PROD", "CONS", "b0", "c0", "pi_sg_plus","pi_sg_minus", 
+            "B", "C", "BB", "CC", "RU"]
+    for col in cols:
+        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col] \
+            = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col].astype(float)
+            
+    
+    
+    # rows_RU_C_B_CC_BB = plot_comparaison_gamma_version_all_scenarios(
+    #                         df_B_C_BB_CC_RU_M)
+    # tab_compGammaVersionAllScenario = Panel(child=rows_RU_C_B_CC_BB, 
+    #                               title="comparison Gamma_version all scenarios")
+    # print("comparison Gamma_version all scenarios: Terminee")
+    
+    # rows_RU_CC_BB = plot_comparaison_gamma_version_RU(df_B_C_BB_CC_RU_M)
+    # tab_compGammaVersionRU = Panel(child=rows_RU_CC_BB, 
+    #                                 title="comparison Gamma_version RU,BB,CC")
+    # print("comparison Gamma_version RU,BB,CC : Terminee")
+    
+    # rows_B_C = plot_comparaison_gamma_version_BC(df_B_C_BB_CC_RU_M)
+    # tab_compGammaVersionBC = Panel(child=rows_B_C, 
+    #                                 title="comparison Gamma_version B,C")
+    # print("comparison Gamma_version B,C : Terminee")
+    
+    # rows_dists_ts = plot_distribution_by_states_4_periods(
+    #                     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T)
+    # tab_dists_ts = Panel(child=rows_dists_ts, title="distribution by state")
+    # print("Distribution of players: TERMINEE")
+    
+    rows_evol_RU_C_B_CC_BB = plot_evolution_RU_C_B_CC_BB_over_time(
+                                df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                                algos=algos_to_show, 
+                                gamma_versions=gamma_versions_to_show, 
+                                scenarios=scenarios_to_show
+                                )
+    tabs_evol_over_time = Panel(child=rows_evol_RU_C_B_CC_BB, 
+                                title="evolution C B CC BB RU over time")
+    print("evolution of gains : TERMINEE")
+    
+    tabs = Tabs(tabs= [ 
+                        # tab_compGammaVersionRU,
+                        # tab_compGammaVersionBC, 
+                        # tab_compGammaVersionAllScenario, 
+                        # tab_dists_ts,
+                        tabs_evol_over_time
+                        ])
+    NAME_RESULT_SHOW_VARS 
+    name_result_show_vars = "comparaison_RU_BCBBCC_gammaVersionV1.html"
+    output_file( os.path.join(name_dir, name_result_show_vars)  )
+    save(tabs)
+    show(tabs)
+    
+def DBG_group_plot_on_panel(df_B_C_BB_CC_RU_M, 
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        algos_to_show, 
+                        dico_SelectGammaVersion):
     
     cols = ["B", "C", "BB", "CC", "RU"]
     for col in cols:
@@ -2056,8 +2131,7 @@ def DBG_group_plot_on_panel(df_B_C_BB_CC_RU_M,
     rows_evol_RU_C_B_CC_BB = plot_evolution_RU_C_B_CC_BB_over_time(
                                 df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
                                 algos=algos_to_show, 
-                                gamma_versions=gamma_versions_to_show, 
-                                scenarios=scenarios_to_show
+                                dico_SelectGammaVersion=dico_SelectGammaVersion
                                 )
     tabs_evol_over_time = Panel(child=rows_evol_RU_C_B_CC_BB, 
                                 title="evolution C B CC BB RU over time")
@@ -2092,7 +2166,7 @@ if __name__ == "__main__":
         
     # name_dir = os.path.join("tests", 
     #                         "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
-    t_periods = 20
+    t_periods = 20#50
     k_steps = 250 #5
     name_dir = os.path.join("tests", 
                             "gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
@@ -2106,12 +2180,9 @@ if __name__ == "__main__":
         dico_SelectGammaVersion={"DETERMINIST": [0,1,2,3,4], 
                                   "LRI1": [0,1,2,3,4],
                                   "LRI2": [0,1,2,3,4]}
-        # dico_SelectGammaVersion={"DETERMINIST": [1,3], 
-        #                          "LRI1": [1,3],
-        #                           "LRI2": [1,3]}
         # dico_SelectGammaVersion={"DETERMINIST": [1], 
-        #                          "LRI1": [1], 
-        #                          "LRI2": [3]}
+        #                           "LRI1": [1], 
+        #                           "LRI2": [0]}
         tuple_paths, path_2_best_learning_steps \
             = get_tuple_paths_of_arrays_SelectGammaVersion(
                 name_dirs=[name_dir], nb_sub_dir=nb_sub_dir,
@@ -2148,11 +2219,8 @@ if __name__ == "__main__":
     print("df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T={} Mo".format(
             round(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T.memory_usage().sum()/(1024*1024), 2)))
     
-    # group_plot_on_panel(
-    #     df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_M, 
-    #     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T)
-    
-    algos_to_show= ["LRI1", "DETERMINIST"];
+   
+    algos_to_show= ["LRI1", "DETERMINIST", "LRI2"];
     gamma_versions_to_show=[];
     scenarios_to_show=[];
    
@@ -2160,18 +2228,14 @@ if __name__ == "__main__":
         df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
         algos_to_show=algos_to_show,
-        gamma_versions_to_show=gamma_versions_to_show,
-        scenarios_to_show=scenarios_to_show)
+        dico_SelectGammaVersion=dico_SelectGammaVersion)
     
-    # algos_to_show=["LRI1"];
-    # gamma_versions_to_show=["ammaV1"];
-    # scenarios_to_show=["scenario0"];
     # DBG_group_plot_on_panel(
     #     df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
     #     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
-    #     algos_to_show=algos_to_show,
-    #     gamma_versions_to_show=gamma_versions_to_show,
-    #     scenarios_to_show=scenarios_to_show)
+    #     algos_to_show=algos_to_show, 
+    #     dico_SelectGammaVersion=dico_SelectGammaVersion)
+    
    
     
     print("runtime={}".format(time.time() - ti))

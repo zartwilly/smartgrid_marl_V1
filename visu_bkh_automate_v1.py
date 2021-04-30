@@ -126,9 +126,9 @@ def get_local_storage_variables(path_to_variable):
                           allow_pickle=True)
     pi_0_minus_T_K = np.load(os.path.join(path_to_variable, "pi_0_minus_T_K.npy"),
                           allow_pickle=True)
-    pi_hp_plus_s = np.load(os.path.join(path_to_variable, "pi_hp_plus_s.npy"),
+    pi_hp_plus_T = np.load(os.path.join(path_to_variable, "pi_hp_plus_T.npy"),
                           allow_pickle=True)
-    pi_hp_minus_s = np.load(os.path.join(path_to_variable, "pi_hp_minus_s.npy"),
+    pi_hp_minus_T = np.load(os.path.join(path_to_variable, "pi_hp_minus_T.npy"),
                           allow_pickle=True)
     
     return arr_pl_M_T_K_vars, \
@@ -138,7 +138,7 @@ def get_local_storage_variables(path_to_variable):
             BB_is_M, CC_is_M, RU_is_M, \
             pi_sg_plus_T_K, pi_sg_minus_T_K, \
             pi_0_plus_T_K, pi_0_minus_T_K, \
-            pi_hp_plus_s, pi_hp_minus_s
+            pi_hp_plus_T, pi_hp_minus_T
             
 def get_tuple_paths_of_arrays(name_dir="tests", name_simu="simu_1811_1754",
                 prices=None, algos=None, learning_rates=None, 
@@ -245,15 +245,26 @@ def get_array_turn_df_for_t_BON(tuple_paths, t=1, k_steps_args=250,
     for tuple_path in tuple_paths:
         path_to_variable = os.path.join(*tuple_path)
         
+        # arr_pl_M_T_K_vars, \
+        # b0_s_T_K, c0_s_T_K, \
+        # B_is_M, C_is_M, \
+        # BENs_M_T_K, CSTs_M_T_K, \
+        # BB_is_M, CC_is_M, RU_is_M, \
+        # pi_sg_plus_T, pi_sg_minus_T, \
+        # pi_0_plus_T, pi_0_minus_T, \
+        # pi_hp_plus_s, pi_hp_minus_s \
+        #     = get_local_storage_variables(path_to_variable)
+        
         arr_pl_M_T_K_vars, \
         b0_s_T_K, c0_s_T_K, \
-        B_is_M, C_is_M, \
+        B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
         BENs_M_T_K, CSTs_M_T_K, \
-        BB_is_M, CC_is_M, RU_is_M, \
+        BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
         pi_sg_plus_T, pi_sg_minus_T, \
         pi_0_plus_T, pi_0_minus_T, \
-        pi_hp_plus_s, pi_hp_minus_s \
-            = get_local_storage_variables(path_to_variable)
+        pi_hp_plus_T, pi_hp_minus_T \
+            = fct_aux.get_local_storage_variables(
+                path_to_variable=path_to_variable)
         
         price = tuple_path[2].split("_")[3]+"_"+tuple_path[2].split("_")[-1]
         algo = tuple_path[3];
@@ -564,15 +575,26 @@ def get_array_turn_df_for_t(tuple_paths, t=1, k_steps_args=250,
     for tuple_path in tuple_paths:
         path_to_variable = os.path.join(*tuple_path)
         
+        # arr_pl_M_T_K_vars, \
+        # b0_s_T_K, c0_s_T_K, \
+        # B_is_M, C_is_M, \
+        # BENs_M_T_K, CSTs_M_T_K, \
+        # BB_is_M, CC_is_M, RU_is_M, \
+        # pi_sg_plus_T, pi_sg_minus_T, \
+        # pi_0_plus_T, pi_0_minus_T, \
+        # pi_hp_plus_s, pi_hp_minus_s \
+        #     = get_local_storage_variables(path_to_variable)
+            
         arr_pl_M_T_K_vars, \
         b0_s_T_K, c0_s_T_K, \
-        B_is_M, C_is_M, \
+        B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
         BENs_M_T_K, CSTs_M_T_K, \
-        BB_is_M, CC_is_M, RU_is_M, \
+        BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T,\
         pi_sg_plus_T, pi_sg_minus_T, \
         pi_0_plus_T, pi_0_minus_T, \
-        pi_hp_plus_s, pi_hp_minus_s \
-            = get_local_storage_variables(path_to_variable)
+        pi_hp_plus_T, pi_hp_minus_T \
+            = fct_aux.get_local_storage_variables(
+                path_to_variable=path_to_variable)
         
         price = tuple_path[2].split("_")[3]+"_"+tuple_path[2].split("_")[-1]
         algo = tuple_path[3];
@@ -2809,8 +2831,11 @@ if __name__ == "__main__":
     name_simu = "simu_DDMM_HHMM_scenario2_T10gammaV4"; k_steps_args = 250; 
     name_simu = "simu_DDMM_HHMM_scenario3_T50gammaV4"; k_steps_args = 250;
     
-    name_simu = "simu_DDMM_HHMM_scenario2_T30gammaV3"; k_steps_args = 250;
-    name_simu = os.path.join("gamma_V1_V3_T30_kstep250_setACsetAB1B2C", name_simu)
+    name_simu = "simu_DDMM_HHMM_scenario2_T20gammaV4"; k_steps_args = 250;
+    name_simu = os.path.join("gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C", name_simu)
+    
+    name_simu = "simu_DDMM_HHMM_scenario2_T5gammaV4"; k_steps_args = 250;
+    name_simu = os.path.join("gamma_V0_V1_V2_V3_V4_T5_kstep75_setACsetAB1B2C", name_simu)
     
     algos_4_no_learning = ["DETERMINIST","RD-DETERMINIST"] \
                             + fct_aux.ALGO_NAMES_BF \
@@ -2832,10 +2857,11 @@ if __name__ == "__main__":
         
     
     dico_k_stop = dict()
+    path_2_best_learning_steps = list(set(path_2_best_learning_steps))
     df_LRI_12, df_k_stop = get_k_stop_4_periods(path_2_best_learning_steps)
     print("get_k_stop_4_periods: TERMINE") 
     
-    
+    tuple_paths = list(set(tuple_paths))
     df_arr_M_T_Ks, \
     df_ben_cst_M_T_K, \
     df_b0_c0_pisg_pi0_T_K, \

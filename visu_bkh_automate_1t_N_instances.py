@@ -146,15 +146,25 @@ def get_array_turn_df_for_t(tuple_paths, t=1, k_steps_args=250,
     for tuple_path in tuple_paths:
         path_to_variable = os.path.join(*tuple_path)
         
+        # arr_pl_M_T_K_vars, \
+        # b0_s_T_K, c0_s_T_K, \
+        # B_is_M, C_is_M, \
+        # BENs_M_T_K, CSTs_M_T_K, \
+        # BB_is_M, CC_is_M, RU_is_M, \
+        # pi_sg_plus_T, pi_sg_minus_T, \
+        # pi_0_plus_T, pi_0_minus_T, \
+        # pi_hp_plus_s, pi_hp_minus_s \
+        #     = autoVizGameV1.get_local_storage_variables(path_to_variable)
+            
         arr_pl_M_T_K_vars, \
         b0_s_T_K, c0_s_T_K, \
-        B_is_M, C_is_M, \
+        B_is_M, C_is_M, B_is_M_T, C_is_M_T,\
         BENs_M_T_K, CSTs_M_T_K, \
-        BB_is_M, CC_is_M, RU_is_M, \
+        BB_is_M, CC_is_M, RU_is_M, BB_is_M_T, CC_is_M_T, RU_is_M_T, \
         pi_sg_plus_T, pi_sg_minus_T, \
         pi_0_plus_T, pi_0_minus_T, \
-        pi_hp_plus_s, pi_hp_minus_s \
-            = autoVizGameV1.get_local_storage_variables(path_to_variable)
+        pi_hp_plus_T, pi_hp_minus_T \
+            = fct_aux.get_local_storage_variables(path_to_variable)
         
         instance = tuple_path[1].split("_")[3] \
                     if len(tuple_path[1].split("_")) >= 3 else str(0)
@@ -1000,7 +1010,7 @@ if __name__ == "__main__":
                          
     name_dir = "tests"
     name_dir_oneperiod = os.path.join(name_dir,"OnePeriod_50instances")
-    name_dir_oneperiod = os.path.join(name_dir,"OnePeriod_50instancesGammaV3")
+    name_dir_oneperiod = os.path.join(name_dir,"OnePeriod_50instancesGammaV4")
     
     tuple_paths, \
     prices_new, \
