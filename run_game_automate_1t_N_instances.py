@@ -28,7 +28,7 @@ if __name__ == "__main__":
     pi_hp_minus = [20] #[20] #[0.33] #[15, 5]
     fct_aux.PI_0_PLUS_INIT = 4 #20 #4
     fct_aux.PI_0_MINUS_INIT = 3 #10 #3
-    NB_INSTANCES = 3#50 #50
+    NB_INSTANCES = 50 #50
     
     algos = ["LRI1", "LRI2", "DETERMINIST"] \
             + fct_aux.ALGO_NAMES_NASH \
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     scenario = None
     
     name_dir = "tests"
-    gamma_versions = [3] #[0,1,2,3,4]
+    gamma_versions = [0,1,2,3,4] #[1,3] #[0,1,2,3,4]
     for gamma_version in gamma_versions:
         
         # ----   execution of 50 instances    ----
@@ -70,7 +70,7 @@ if __name__ == "__main__":
             date_hhmm_new = "_".join([date_hhmm, str(i), "t", str(t_periods)])
             
             autoExeGame4T\
-                .execute_algos_used_Generated_instances(
+                .execute_algos_used_Generated_instances_N_INSTANCES(
                     arr_pl_M_T_vars_init, 
                     name_dir = name_dir_oneperiod,
                     date_hhmm = date_hhmm_new,
@@ -88,6 +88,7 @@ if __name__ == "__main__":
                     criteria_bf = criteria_bf, 
                     debug = False
                     )
+            
                 
     print("runtime = {}".format(time.time() - ti))
     

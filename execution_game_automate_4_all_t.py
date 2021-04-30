@@ -312,6 +312,175 @@ def execute_algos_used_Generated_instances(arr_pl_M_T_vars_init,
     print("NB_EXECUTION cpt={}".format(cpt))
 #_________                   all ALGOs: fin                     ______________ 
 
+#_________            all ALGOs N instances: debut                     __________ 
+def execute_algos_used_Generated_instances_N_INSTANCES(arr_pl_M_T_vars_init,
+                                            name_dir=None,
+                                            date_hhmm=None,
+                                            k_steps=None,
+                                            NB_REPEAT_K_MAX=None,
+                                            algos=None,
+                                            learning_rates=None,
+                                            pi_hp_plus=None,
+                                            pi_hp_minus=None,
+                                            a=1, b=1,
+                                            gamma_version=1,
+                                            used_instances=True,
+                                            used_storage_det=True,
+                                            manual_debug=False, 
+                                            criteria_bf="Perf_t", 
+                                            debug=False):
+    """
+    execute algos by using generated instances if there exists or 
+        by generating new instances
+    
+    date_hhmm="1041"
+    algos=["LRI1"]
+    
+    """
+    # directory to save  execution algos
+    name_dir = "tests" if name_dir is None else name_dir
+    date_hhmm = datetime.now().strftime("%d%m_%H%M") \
+            if date_hhmm is None \
+            else date_hhmm
+    
+    # steps of learning
+    k_steps = 5 if k_steps is None else k_steps
+    fct_aux.NB_REPEAT_K_MAX = 3 if NB_REPEAT_K_MAX is None else NB_REPEAT_K_MAX
+    p_i_j_ks = [0.5, 0.5, 0.5]
+    
+    # list of algos
+    ALGOS = ["LRI1", "LRI2", "DETERMINIST", "RD-DETERMINIST"]\
+            + fct_aux.ALGO_NAMES_BF + fct_aux.ALGO_NAMES_NASH
+    algos = ALGOS if algos is None \
+                  else algos
+    # list of pi_hp_plus, pi_hp_minus
+    pi_hp_plus = [0.2*pow(10,-3)] if pi_hp_plus is None else pi_hp_plus
+    pi_hp_minus = [0.33] if pi_hp_minus is None else pi_hp_minus
+    # learning rate 
+    learning_rates = [0.01] \
+            if learning_rates is None \
+            else learning_rates # list(np.arange(0.05, 0.15, step=0.05))
+    
+    
+    
+    zip_pi_hp = list(zip(pi_hp_plus, pi_hp_minus))
+    
+    cpt = 0
+    algo_piHpPlusMinus_learningRate \
+            = it.product(algos, zip_pi_hp, learning_rates)
+    
+    for (algo_name, (pi_hp_plus_elt, pi_hp_minus_elt), 
+             learning_rate) in algo_piHpPlusMinus_learningRate:
+        
+        print("______ execution {}: {}, rate={}______".format(cpt, 
+                    algo_name, learning_rate))
+        cpt += 1
+        msg = "pi_hp_plus_"+str(pi_hp_plus_elt)\
+                       +"_pi_hp_minus_"+str(pi_hp_minus_elt)
+        path_to_save = os.path.join(name_dir, "simu_"+date_hhmm,
+                                    msg, algo_name
+                                    )
+        if algo_name == ALGOS[0]:
+            # 0: LRI1
+            print("*** ALGO: {} *** ".format(algo_name))
+            utility_function_version = 1
+            path_to_save = os.path.join(name_dir, "simu_"+date_hhmm,
+                                    msg, algo_name, str(learning_rate)
+                                    )
+            Path(path_to_save).mkdir(parents=True, exist_ok=True)
+            arr_M_T_K_vars = autoLriGameModel\
+                                .lri_balanced_player_game_all_pijk_upper_08(
+                                    arr_pl_M_T_vars_init.copy(),
+                                    pi_hp_plus=pi_hp_plus_elt, 
+                                    pi_hp_minus=pi_hp_minus_elt,
+                                    a=a, b=b,
+                                    gamma_version=gamma_version,
+                                    k_steps=k_steps, 
+                                    learning_rate=learning_rate,
+                                    p_i_j_ks=p_i_j_ks,
+                                    utility_function_version=utility_function_version,
+                                    path_to_save=path_to_save, 
+                                    manual_debug=manual_debug, dbg=debug)
+        elif algo_name == ALGOS[1]:
+            # 1: LRI2
+            print("*** ALGO: {} *** ".format(algo_name))
+            utility_function_version = 2
+            path_to_save = os.path.join(name_dir, "simu_"+date_hhmm,
+                                    msg, algo_name, str(learning_rate)
+                                    )
+            Path(path_to_save).mkdir(parents=True, exist_ok=True)
+            arr_M_T_K_vars = autoLriGameModel\
+                                .lri_balanced_player_game_all_pijk_upper_08(
+                                    arr_pl_M_T_vars_init.copy(),
+                                    pi_hp_plus=pi_hp_plus_elt, 
+                                    pi_hp_minus=pi_hp_minus_elt,
+                                    a=a, b=b,
+                                    gamma_version=gamma_version,
+                                    k_steps=k_steps, 
+                                    learning_rate=learning_rate,
+                                    p_i_j_ks=p_i_j_ks,
+                                    utility_function_version=utility_function_version,
+                                    path_to_save=path_to_save, 
+                                    manual_debug=manual_debug, dbg=debug)
+                                
+        elif algo_name == ALGOS[2] or algo_name == ALGOS[3]:
+            # 2: DETERMINIST, 3: RANDOM DETERMINIST
+            print("*** ALGO: {} *** ".format(algo_name))
+            random_determinist = False if algo_name == ALGOS[2] else True
+            Path(path_to_save).mkdir(parents=True, exist_ok=True)
+            arr_M_T_vars = autoDetGameModel.determinist_balanced_player_game(
+                             arr_pl_M_T_vars_init.copy(),
+                             pi_hp_plus=pi_hp_plus_elt, 
+                             pi_hp_minus=pi_hp_minus_elt,
+                             a=a, b=b,
+                             gamma_version=gamma_version,
+                             random_determinist=random_determinist,
+                             used_storage=used_storage_det,
+                             path_to_save=path_to_save, 
+                             manual_debug=manual_debug, dbg=debug)
+            
+        elif algo_name in fct_aux.ALGO_NAMES_BF :
+            # 0: BEST_BRUTE_FORCE (BF) , 1:BAD_BF, 2: MIDDLE_BF
+            # execute tous les BF
+            print("*** ALGO: {} *** ".format(algo_name))
+            Path(path_to_save).mkdir(parents=True, exist_ok=True)
+            arr_M_T_vars = autoBfGameModel\
+                            .bf_balanced_player_game_ONE_ALGO(
+                                arr_pl_M_T_vars_init.copy(),
+                                algo_name=algo_name,
+                                pi_hp_plus=pi_hp_plus_elt, 
+                                pi_hp_minus=pi_hp_minus_elt,
+                                a=a, b=b,
+                                gamma_version=gamma_version,
+                                path_to_save=path_to_save, 
+                                name_dir=name_dir, 
+                                date_hhmm=date_hhmm,
+                                manual_debug=manual_debug, 
+                                criteria_bf=criteria_bf, dbg=debug)
+                            
+                           
+        elif algo_name in fct_aux.ALGO_NAMES_NASH :
+            # 0: "BEST-NASH", 1: "BAD-NASH", 2: "MIDDLE-NASH"
+            print("*** ALGO: {} *** ".format(algo_name))
+            Path(path_to_save).mkdir(parents=True, exist_ok=True)
+            arr_M_T_vars = autoNashGameModel\
+                            .nash_balanced_player_game_ONE_ALGO(
+                                arr_pl_M_T_vars_init.copy(),
+                                algo_name=algo_name,
+                                pi_hp_plus=pi_hp_plus_elt, 
+                                pi_hp_minus=pi_hp_minus_elt,
+                                a=a, b=b,
+                                gamma_version=gamma_version,
+                                path_to_save=path_to_save, 
+                                name_dir=name_dir, 
+                                date_hhmm=date_hhmm,
+                                manual_debug=manual_debug, 
+                                dbg=debug)    
+    
+        
+    print("NB_EXECUTION cpt={}".format(cpt))
+#_________                   all ALGOs: fin                     ______________ 
+
 #_________                      One algo: debut                 _______________
 def execute_algos_used_Generated_instances_ONE_ALGO(arr_pl_M_T_vars_init,
                                                     algo_name,
@@ -408,7 +577,7 @@ def execute_algos_used_Generated_instances_ONE_ALGO(arr_pl_M_T_vars_init,
                          path_to_save=path_to_save, 
                          manual_debug=manual_debug, dbg=debug)
         
-    elif algo_name == fct_aux.ALGO_NAMES_BF[0]:
+    elif algo_name in fct_aux.ALGO_NAMES_BF:
         # 0: BEST_BRUTE_FORCE (BF) , 1:BAD_BF, 2: MIDDLE_BF
         print("*** ALGO: {} *** ".format(algo_name))
         path_to_save = os.path.join(name_dir, "simu_"+date_hhmm,
@@ -416,8 +585,9 @@ def execute_algos_used_Generated_instances_ONE_ALGO(arr_pl_M_T_vars_init,
                                     )
         Path(path_to_save).mkdir(parents=True, exist_ok=True)
         arr_M_T_vars = autoBfGameModel\
-                            .bf_balanced_player_game(
-                                arr_pl_M_T_vars_init.copy(),
+                            .bf_balanced_player_game_ONE_ALGO(
+                                arr_pl_M_T_vars_init=arr_pl_M_T_vars_init.copy(),
+                                algo_name=algo_name,
                                 pi_hp_plus=pi_hp_plus, 
                                 pi_hp_minus=pi_hp_minus,
                                 a=a, b=b,
