@@ -433,7 +433,8 @@ def turn_arrays_2_2D_learning_algos(arr_pl_M_T_K_vars,
     # create dataframe df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T_lri_x named df_M_T_lri_x
     # tu_mt
     selected_cols = ["state_i","k_stop", "PROD", "CONS", "b0", "c0", 
-                     "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU"]
+                     "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU", 
+                     "Si", "mode_i"]
     id_cols = [ AUTOMATE_INDEX_ATTRS_NEW[col] for col in selected_cols]
     arr_pl_M_T_KSTOP_vars_2D = arr_pl_M_T_KSTOP_vars[:,:, id_cols]\
                                 .reshape(-1, len(id_cols))
@@ -584,7 +585,8 @@ def turn_arrays_2_2D_4_not_learning_algos(arr_pl_M_T_K_vars,
     # create dataframe df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T_lri
     # tu_mt
     selected_cols = ["state_i","k_stop", "PROD", "CONS", "b0", "c0", 
-                     "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU"]
+                     "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU", 
+                     "Si", "mode_i"]
     id_cols = [ AUTOMATE_INDEX_ATTRS_NEW[col] for col in selected_cols]
     arr_pl_M_T_KSTOP_vars_2D = arr_pl_M_T_KSTOP_vars[:,:, id_cols]\
                                 .reshape(-1, len(id_cols))
@@ -1988,6 +1990,117 @@ def plot_evolution_RU_C_B_CC_BB_over_time(
 
 # _____________________________________________________________________________
 #
+#              evolution stocks by player over periods ---> debut
+# _____________________________________________________________________________
+def plot_evolution_stocks_by_players_for_time(df_al_pr_ra_sc_gam, algo, rate, 
+                                              price, scenario, gamma_version):
+    
+    
+    cols = ["pl_i", "t", "state_i", "mode_i", "Si"]
+    df_pl_t = df_al_pr_ra_sc_gam[cols]
+    
+    x = list( map(tuple, df_pl_t[cols[:2]].values) )
+    
+    
+    TOOLS[7] = HoverTool(tooltips=[
+                            ("Si", "@Si"),
+                            ("mode_i", "@mode_i"),
+                            ("state_i", "@state_i"),
+                            ]
+                        )
+    
+    px= figure(x_range=FactorRange(*x), 
+               plot_height=350, plot_width = int(WIDTH*MULT_WIDTH),
+               toolbar_location="above", tools=TOOLS)
+    
+
+    data = dict(x=x, Si=df_pl_t.Si.tolist(), 
+                state_i=df_pl_t.state_i.tolist(), 
+                mode_i=df_pl_t.mode_i.tolist() )
+    
+    source = ColumnDataSource(data=data)
+    
+    m_players = len(df_pl_t.pl_i.unique())
+    colors = [color for i, color in enumerate(Viridis256) 
+                      if i% int(256/m_players) == 0 ]
+    px.vbar(x='x', top='Si', width=0.9, source=source, 
+            fill_color=factor_cmap('x', 
+                                   #palette=Category20[20], 
+                                   palette=colors, 
+                                   factors=list(df_pl_t.pl_i.unique()), 
+                                   start=0, end=1))
+    
+    title = "evolution of stock by players over time ({}, {}, {}, rate={}, price={})".format(
+            algo, scenario, gamma_version, rate, price)
+    px.title.text = title
+    px.y_range.start = df_pl_t.Si.min() - 1
+    px.x_range.range_padding = 0.1#WIDTH
+    px.xgrid.grid_line_color = None
+    px.legend.location = "top_right" #"top_left"
+    px.legend.orientation = "horizontal"
+    px.xaxis.major_label_orientation = 1
+    px.xaxis.axis_label = "players"
+    px.yaxis.axis_label = "values"
+    
+    return px
+    
+
+def plot_evolution_Si_by_players_over_time(
+            df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+            algos=["LRI1"], 
+            dico_SelectGammaVersion={"DETERMINIST": [1],"LRI1": [1],"LRI2": [0]}):
+    
+    df = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T.copy()
+    df["pl_i"] = df.pl_i.astype(str)
+    df["t"] = df.t.astype(str)
+    
+    rates = df.rate.unique(); rates = rates[rates!=0].tolist()
+    prices = df.prices.unique().tolist()
+    scenarios = df.scenario.unique().tolist()
+    gamma_version_root = "".join(list(df.gamma_version.unique()[0])[:-1])
+    
+    dico_pxs = dict()
+    for algo, price, rate, scenario in it.product(algos, prices, 
+                                                  rates, scenarios):
+        gamma_versions = dico_SelectGammaVersion[algo]
+        for gamma_version_number in gamma_versions:
+            gamma_version = gamma_version_root+str(gamma_version_number)
+            mask_al_pr_ra_sc_gam = ((df.rate == str(rate)) | (df.rate == 0)) \
+                                    & (df.prices == price) \
+                                    & (df.algo == algo) \
+                                    & (df.scenario == scenario) \
+                                    & (df.gamma_version == gamma_version)
+            df_al_pr_ra_sc_gam = df[mask_al_pr_ra_sc_gam].copy()
+            
+            print("{}, {}, {}, df_al_pr_ra_sc_gam={}".format(algo, 
+                    scenario, gamma_version, df_al_pr_ra_sc_gam.shape ))
+            pxs_al_pr_ra_sc_gam = plot_evolution_stocks_by_players_for_time(
+                                    df_al_pr_ra_sc_gam, algo, rate, 
+                                    price, scenario, gamma_version)
+            #pxs_al_pr_ra_sc_gam.legend.click_policy="hide"
+            
+            if (algo, price, rate, scenario, gamma_version) not in dico_pxs.keys():
+                dico_pxs[(algo, price, rate, scenario, gamma_version)] \
+                    = [pxs_al_pr_ra_sc_gam]
+            else:
+                dico_pxs[(algo, price, rate, scenario, gamma_version)]\
+                    .append(pxs_al_pr_ra_sc_gam)
+        
+    rows_evol_Si = list()
+    for key, pxs_al_pr_ra_sc_gam in dico_pxs.items():
+        col_px_sts = column(pxs_al_pr_ra_sc_gam)
+        rows_evol_Si.append(col_px_sts)
+    rows_evol_Si = column(children=rows_evol_Si, sizing_mode='stretch_both')
+    
+    return rows_evol_Si
+    
+# _____________________________________________________________________________
+#
+#              evolution stocks by player over periods ---> fin
+# _____________________________________________________________________________
+
+# _____________________________________________________________________________
+#
 #                   affichage  dans tab  ---> debut
 # _____________________________________________________________________________
 def group_plot_on_panel(df_B_C_BB_CC_RU_M, 
@@ -2038,12 +2151,22 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
                                 title="evolution C B CC BB RU over time")
     print("evolution of gains : TERMINEE")
     
+    rows_evol_Si = plot_evolution_Si_by_players_over_time(
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        algos=algos_to_show, 
+                        dico_SelectGammaVersion=dico_SelectGammaVersion
+                    )
+    tabs_evol_Si_over_time = Panel(child=rows_evol_Si, 
+                                title="evolution of stocks over time")
+    print("evolution of Stocks Si : TERMINEE")
+    
     tabs = Tabs(tabs= [ 
                         tab_compGammaVersionRU,
                         tab_compGammaVersionBC, 
                         tab_compGammaVersionAllScenario, 
                         tab_dists_ts,
-                        tabs_evol_over_time
+                        tabs_evol_over_time, 
+                        tabs_evol_Si_over_time
                         ])
     NAME_RESULT_SHOW_VARS 
     name_result_show_vars = "comparaison_RU_BCBBCC_gammaVersionV1.html"
@@ -2100,12 +2223,22 @@ def OLD_group_plot_on_panel(df_B_C_BB_CC_RU_M,
                                 title="evolution C B CC BB RU over time")
     print("evolution of gains : TERMINEE")
     
+    rows_evol_Si = plot_evolution_Si_by_players_over_time(
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        algos=algos_to_show, 
+                        dico_SelectGammaVersion=dico_SelectGammaVersion
+                    )
+    tabs_evol_Si_over_time = Panel(child=rows_evol_Si, 
+                                title="evolution of stocks over time")
+    print("evolution of Stocks Si : TERMINEE")
+    
     tabs = Tabs(tabs= [ 
                         # tab_compGammaVersionRU,
                         # tab_compGammaVersionBC, 
                         # tab_compGammaVersionAllScenario, 
                         # tab_dists_ts,
-                        tabs_evol_over_time
+                        tabs_evol_over_time,
+                        tabs_evol_Si_over_time
                         ])
     NAME_RESULT_SHOW_VARS 
     name_result_show_vars = "comparaison_RU_BCBBCC_gammaVersionV1.html"
@@ -2128,17 +2261,27 @@ def DBG_group_plot_on_panel(df_B_C_BB_CC_RU_M,
         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col] \
             = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col].astype(float)
             
-    rows_evol_RU_C_B_CC_BB = plot_evolution_RU_C_B_CC_BB_over_time(
-                                df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
-                                algos=algos_to_show, 
-                                dico_SelectGammaVersion=dico_SelectGammaVersion
-                                )
-    tabs_evol_over_time = Panel(child=rows_evol_RU_C_B_CC_BB, 
-                                title="evolution C B CC BB RU over time")
-    print("evolution of gains : TERMINEE")
+    # rows_evol_RU_C_B_CC_BB = plot_evolution_RU_C_B_CC_BB_over_time(
+    #                             df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+    #                             algos=algos_to_show, 
+    #                             dico_SelectGammaVersion=dico_SelectGammaVersion
+    #                             )
+    # tabs_evol_over_time = Panel(child=rows_evol_RU_C_B_CC_BB, 
+    #                             title="evolution C B CC BB RU over time")
+    # print("evolution of gains : TERMINEE")
+    
+    rows_evol_Si = plot_evolution_Si_by_players_over_time(
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        algos=algos_to_show, 
+                        dico_SelectGammaVersion=dico_SelectGammaVersion
+                    )
+    tabs_evol_Si_over_time = Panel(child=rows_evol_Si, 
+                                title="evolution of stocks over time")
+    print("evolution of Stocks Si : TERMINEE")
     
     tabs = Tabs(tabs= [ 
-                        tabs_evol_over_time
+                        #tabs_evol_over_time,
+                        tabs_evol_Si_over_time
                         ])
     #NAME_RESULT_SHOW_VARS 
     name_result_show_vars = "comparaison_RU_BCBBCC_gammaVersionV1.html"
@@ -2163,13 +2306,14 @@ if __name__ == "__main__":
     ti = time.time()
     
     k_steps = 250
+    phi_name = "A2B2" # A1B1, A2B2, A1B0
         
     # name_dir = os.path.join("tests", 
     #                         "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
-    t_periods = 20#50
+    t_periods = 50#20#50
     k_steps = 250 #5
     name_dir = os.path.join("tests", 
-                            "gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
+                            phi_name+"gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
     
     nb_sub_dir = len(name_dir.split(os.sep))
     
@@ -2180,9 +2324,9 @@ if __name__ == "__main__":
         dico_SelectGammaVersion={"DETERMINIST": [0,1,2,3,4], 
                                   "LRI1": [0,1,2,3,4],
                                   "LRI2": [0,1,2,3,4]}
-        # dico_SelectGammaVersion={"DETERMINIST": [1], 
-        #                           "LRI1": [1], 
-        #                           "LRI2": [0]}
+        dico_SelectGammaVersion={"DETERMINIST": [1], 
+                                  "LRI1": [1], 
+                                  "LRI2": [0]}
         tuple_paths, path_2_best_learning_steps \
             = get_tuple_paths_of_arrays_SelectGammaVersion(
                 name_dirs=[name_dir], nb_sub_dir=nb_sub_dir,
