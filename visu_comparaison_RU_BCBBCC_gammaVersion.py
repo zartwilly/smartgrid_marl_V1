@@ -434,7 +434,7 @@ def turn_arrays_2_2D_learning_algos(arr_pl_M_T_K_vars,
     # tu_mt
     selected_cols = ["state_i","k_stop", "PROD", "CONS", "b0", "c0", 
                      "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU", 
-                     "Si", "mode_i"]
+                     "Si", "mode_i", "ben", "cst"]
     id_cols = [ AUTOMATE_INDEX_ATTRS_NEW[col] for col in selected_cols]
     arr_pl_M_T_KSTOP_vars_2D = arr_pl_M_T_KSTOP_vars[:,:, id_cols]\
                                 .reshape(-1, len(id_cols))
@@ -586,7 +586,7 @@ def turn_arrays_2_2D_4_not_learning_algos(arr_pl_M_T_K_vars,
     # tu_mt
     selected_cols = ["state_i","k_stop", "PROD", "CONS", "b0", "c0", 
                      "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU", 
-                     "Si", "mode_i"]
+                     "Si", "mode_i", "ben", "cst"]
     id_cols = [ AUTOMATE_INDEX_ATTRS_NEW[col] for col in selected_cols]
     arr_pl_M_T_KSTOP_vars_2D = arr_pl_M_T_KSTOP_vars[:,:, id_cols]\
                                 .reshape(-1, len(id_cols))
@@ -808,7 +808,7 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
     """
     vars_2_add = ["k_stop", "PROD", "CONS", 
                   "b0", "c0", "pi_sg_plus","pi_sg_minus", 
-                  "B", "C", "BB", "CC", "RU"]
+                  "B", "C", "BB", "CC", "RU", "ben", "cst"]
     dico_vars2Add = dict()
     for i in range(0, len(vars_2_add)):
         nb_attrs = len(fct_aux.AUTOMATE_INDEX_ATTRS)
@@ -823,30 +823,25 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
                                       len(AUTOMATE_INDEX_ATTRS_NEW)), 
                                 dtype=object)
     
-    # arr_pl_M_T_KSTOP_vars[:,:,list(fct_aux.AUTOMATE_INDEX_ATTRS.values()) ] \
-    #     = arr_pl_M_T_K_vars[:,:,:]
-        
-    
     t_periods = arr_pl_M_T_K_vars.shape[1]
     for t in range(0, t_periods):
+        ben_M, cst_M = None, None
         k_stop = None
         if algo_name in algos_4_no_learning:
             arr_pl_M_T_KSTOP_vars[:,t,list(fct_aux.AUTOMATE_INDEX_ATTRS.values()) ] \
-                = arr_pl_M_T_K_vars[:,t,:] 
+                = arr_pl_M_T_K_vars[:,t,:]
+            ben_M = BENs_M_T_K[:,t]
+            cst_M = CSTs_M_T_K[:,t]
         else:
             index_kstop = scenario_name+"_"+gamma_version+"_"+algo_name+"_"+"k_stop"
             k_stop = df_LRI_12_kstop.loc[index_kstop, str(t)]
             arr_pl_M_T_KSTOP_vars[:,t,list(fct_aux.AUTOMATE_INDEX_ATTRS.values()) ] \
                 = arr_pl_M_T_K_vars[:,t,k_stop,:]
+            ben_M = BENs_M_T_K[:,t, k_stop]
+            cst_M = CSTs_M_T_K[:,t, k_stop]
             
-            
-        # index_kstop = scenario_name+"_"+gamma_version+"_"+algo_name+"_"+"k_stop"
-        # k_stop = df_LRI_12_stop.loc[index_kstop, str(t)]
-        # arr_pl_M_T_KSTOP_vars[:,t,list(fct_aux.AUTOMATE_INDEX_ATTRS.values()) ] \
-        #     = arr_pl_M_T_K_vars[:,t,:] \
-        #         if algo_name in algos_4_no_learning \
-        #         else arr_pl_M_T_K_vars[:,t,k_stop,:]
-                
+        arr_pl_M_T_KSTOP_vars[:,t,AUTOMATE_INDEX_ATTRS_NEW["ben"]] = ben_M
+        arr_pl_M_T_KSTOP_vars[:,t,AUTOMATE_INDEX_ATTRS_NEW["cst"]] = cst_M
                 
         b0_t, c0_t = None, None
         b0_0_t_minus_1, c0_0_t_minus_1 = None, None
@@ -871,11 +866,15 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
                                            fct_aux.AUTOMATE_INDEX_ATTRS["prod_i"]]
                 CONS_i_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, 
                                            fct_aux.AUTOMATE_INDEX_ATTRS["cons_i"]]
+                ben_M = BENs_M_T_K[:,t]
+                cst_M = CSTs_M_T_K[:,t]
             else:
                 PROD_i_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, k_stop,
                                            fct_aux.AUTOMATE_INDEX_ATTRS["prod_i"]]
                 CONS_i_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, k_stop,
                                            fct_aux.AUTOMATE_INDEX_ATTRS["cons_i"]]
+                ben_M = BENs_M_T_K[:,t, k_stop]
+                cst_M = CSTs_M_T_K[:,t, k_stop]
                 
             PROD_i = np.sum(PROD_i_0_t_minus_1, axis=0) 
             CONS_i = np.sum(CONS_i_0_t_minus_1, axis=0)
@@ -2306,7 +2305,7 @@ if __name__ == "__main__":
     ti = time.time()
     
     k_steps = 250
-    phi_name = "A2B2" # A1B1, A2B2, A1B0
+    phi_name = "A1B1" # A1B1, A2B2, A1B0, A2B8
         
     # name_dir = os.path.join("tests", 
     #                         "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
