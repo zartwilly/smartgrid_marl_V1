@@ -23,9 +23,9 @@ if __name__ == "__main__":
     NB_REPEAT_K_MAX= 10 #3 #15 #30
     learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
     fct_aux.N_DECIMALS = 8
-    a = 1; b = 1;
+    dico_phiname_ab = {"A1B1": {"a":1, "b":1}, "A1.2B0.9": {"a":1.2, "b":0.8}}
     pi_hp_plus = [10] #[10] #[0.2*pow(10,-3)] #[5, 15]
-    pi_hp_minus = [20] #[20] #[0.33] #[15, 5]
+    pi_hp_minus = [30] #[20] #[0.33] #[15, 5]
     fct_aux.PI_0_PLUS_INIT = 4 #20 #4
     fct_aux.PI_0_MINUS_INIT = 3 #10 #3
     NB_INSTANCES = 50 #50
@@ -39,55 +39,60 @@ if __name__ == "__main__":
     setA_m_players, setB_m_players, setC_m_players = 10, 6, 5                  # 21 players 
     setA_m_players, setB_m_players, setC_m_players = 8, 4, 4                   # 16 players
     setA_m_players, setB_m_players, setC_m_players = 6, 3, 3                   # 12 players
+                      
     scenario_name = "scenario0"
     scenario = None
     
     name_dir = "tests"
-    gamma_versions = [0,1,2,3,4] #[1,3] #[0,1,2,3,4]
+    gamma_versions = [-1] #-1 : random normal distribution
     for gamma_version in gamma_versions:
         
-        # ----   execution of 50 instances    ----
-        criteria_bf = "Perf_t"
-        used_storage_det = True #False #True
-        manual_debug = False #True #False #True
-        name_dir_oneperiod = os.path.join(
-                                name_dir,
-                                "OnePeriod_"+str(NB_INSTANCES)+"instances"+"GammaV"+str(gamma_version))
+        for phi_name, dico_ab in dico_phiname_ab.items():
         
-        for i in range(0, NB_INSTANCES):
-            used_instances = False #True
-            arr_pl_M_T_vars_init = None
-            path_to_arr_pl_M_T = os.path.join(*[name_dir, "AUTOMATE_INSTANCES_GAMES"])
-            arr_pl_M_T_vars_init \
-                = fct_aux.get_or_create_instance_Pi_Ci_one_period(
-                    setA_m_players, setB_m_players, setC_m_players, 
-                    t_periods, 
-                    scenario,
-                    scenario_name,
-                    path_to_arr_pl_M_T, used_instances)
+            # ----   execution of 50 instances    ----
+            criteria_bf = "Perf_t"
+            used_storage_det = True #False #True
+            manual_debug = False #True #False #True
+            name_dir_oneperiod = os.path.join(
+                                    name_dir,
+                                    #"OnePeriod_50instances",
+                                    phi_name+"OnePeriod_50instances",
+                                    "OnePeriod_"+str(NB_INSTANCES)+"instances"+"GammaV"+str(gamma_version))
             
-            # ---- execution of various data  ----
-            date_hhmm_new = "_".join([date_hhmm, str(i), "t", str(t_periods)])
-            
-            autoExeGame4T\
-                .execute_algos_used_Generated_instances_N_INSTANCES(
-                    arr_pl_M_T_vars_init, 
-                    name_dir = name_dir_oneperiod,
-                    date_hhmm = date_hhmm_new,
-                    k_steps = k_steps,
-                    NB_REPEAT_K_MAX = NB_REPEAT_K_MAX,
-                    algos = algos,
-                    learning_rates = learning_rates,
-                    pi_hp_plus = pi_hp_plus,
-                    pi_hp_minus = pi_hp_minus,
-                    a = a, b = b,
-                    gamma_version=gamma_version,
-                    used_instances = used_instances,
-                    used_storage_det = used_storage_det,
-                    manual_debug = manual_debug, 
-                    criteria_bf = criteria_bf, 
-                    debug = False
-                    )
+            for i in range(0, NB_INSTANCES):
+                used_instances = False #True
+                arr_pl_M_T_vars_init = None
+                path_to_arr_pl_M_T = os.path.join(*[name_dir, "AUTOMATE_INSTANCES_GAMES"])
+                arr_pl_M_T_vars_init \
+                    = fct_aux.get_or_create_instance_Pi_Ci_one_period(
+                        setA_m_players, setB_m_players, setC_m_players, 
+                        t_periods, 
+                        scenario,
+                        scenario_name,
+                        path_to_arr_pl_M_T, used_instances)
+                
+                # ---- execution of various data  ----
+                date_hhmm_new = "_".join([date_hhmm, str(i), "t", str(t_periods)])
+                
+                autoExeGame4T\
+                    .execute_algos_used_Generated_instances_N_INSTANCES(
+                        arr_pl_M_T_vars_init, 
+                        name_dir = name_dir_oneperiod,
+                        date_hhmm = date_hhmm_new,
+                        k_steps = k_steps,
+                        NB_REPEAT_K_MAX = NB_REPEAT_K_MAX,
+                        algos = algos,
+                        learning_rates = learning_rates,
+                        pi_hp_plus = pi_hp_plus,
+                        pi_hp_minus = pi_hp_minus,
+                        a = dico_ab['a'], b = dico_ab['b'],
+                        gamma_version=gamma_version,
+                        used_instances = used_instances,
+                        used_storage_det = used_storage_det,
+                        manual_debug = manual_debug, 
+                        criteria_bf = criteria_bf, 
+                        debug = False
+                        )
             
                 
     print("runtime = {}".format(time.time() - ti))

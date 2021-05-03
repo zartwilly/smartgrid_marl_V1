@@ -987,6 +987,7 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
                                 num_pl_i, t, k, gamma_i, Si,
                                 pi_0_minus, pi_0_plus, 
                                 pi_hp_minus_t, pi_hp_plus_t, dbg)
+            
         if gamma_version == 1:
             variables = [("Si", Si), ("state_i", state_i), ("gamma_i", gamma_i), 
                       ("Si_minus", Si_t_minus), ("Si_plus", Si_t_plus)]
@@ -996,6 +997,7 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
                                 num_pl_i, t, k, gamma_i, Si,
                                 pi_0_minus, pi_0_plus, 
                                 pi_hp_minus_t, pi_hp_plus_t, dbg)
+            
         elif gamma_version == 3:
             gamma_i = None
             if manual_debug:
@@ -1012,6 +1014,7 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
                                 num_pl_i, t, k, gamma_i, Si,
                                 pi_0_minus, pi_0_plus, 
                                 pi_hp_minus_t, pi_hp_plus_t, dbg)
+            
         elif gamma_version == 4:
             gamma_i = None
             if manual_debug:
@@ -1032,6 +1035,17 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
                 
             variables = [("Si", Si), ("state_i", state_i), ("gamma_i", gamma_i), 
                      ("Si_minus", Si_t_minus), ("Si_plus", Si_t_plus)]
+            arr_pl_M_t_K_vars = update_variables_MtK(
+                                arr_pl_M_t_K_vars, arr_pl_M_t_minus_1_K_vars, 
+                                variables, shape_arr_pl,
+                                num_pl_i, t, k, gamma_i, Si,
+                                pi_0_minus, pi_0_plus, 
+                                pi_hp_minus_t, pi_hp_plus_t, dbg)
+            
+        elif gamma_version == -1:
+            gamma_i = np.random.randint(low=2, high=21, size=1)[0]
+            variables = [("Si", Si), ("state_i", state_i), ("gamma_i", gamma_i), 
+                         ("Si_minus", Si_t_minus), ("Si_plus", Si_t_plus)]
             arr_pl_M_t_K_vars = update_variables_MtK(
                                 arr_pl_M_t_K_vars, arr_pl_M_t_minus_1_K_vars, 
                                 variables, shape_arr_pl,
