@@ -434,7 +434,7 @@ def turn_arrays_2_2D_learning_algos(arr_pl_M_T_K_vars,
     # tu_mt
     selected_cols = ["state_i","k_stop", "PROD", "CONS", "b0", "c0", 
                      "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU", 
-                     "Si", "mode_i", "ben", "cst"]
+                     "Si", "mode_i", "ben", "cst", "Cicum", "Picum", "set"]
     id_cols = [ AUTOMATE_INDEX_ATTRS_NEW[col] for col in selected_cols]
     arr_pl_M_T_KSTOP_vars_2D = arr_pl_M_T_KSTOP_vars[:,:, id_cols]\
                                 .reshape(-1, len(id_cols))
@@ -586,7 +586,7 @@ def turn_arrays_2_2D_4_not_learning_algos(arr_pl_M_T_K_vars,
     # tu_mt
     selected_cols = ["state_i","k_stop", "PROD", "CONS", "b0", "c0", 
                      "pi_sg_plus","pi_sg_minus", "B", "C", "BB", "CC", "RU", 
-                     "Si", "mode_i", "ben", "cst"]
+                     "Si", "mode_i", "ben", "cst", "Cicum", "Picum", "set"]
     id_cols = [ AUTOMATE_INDEX_ATTRS_NEW[col] for col in selected_cols]
     arr_pl_M_T_KSTOP_vars_2D = arr_pl_M_T_KSTOP_vars[:,:, id_cols]\
                                 .reshape(-1, len(id_cols))
@@ -808,7 +808,7 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
     """
     vars_2_add = ["k_stop", "PROD", "CONS", 
                   "b0", "c0", "pi_sg_plus","pi_sg_minus", 
-                  "B", "C", "BB", "CC", "RU", "ben", "cst"]
+                  "B", "C", "BB", "CC", "RU", "ben", "cst", "Cicum", "Picum"]
     dico_vars2Add = dict()
     for i in range(0, len(vars_2_add)):
         nb_attrs = len(fct_aux.AUTOMATE_INDEX_ATTRS)
@@ -861,11 +861,16 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
         
         for num_pl_i in range(arr_pl_M_T_K_vars.shape[0]):
             PROD_i_0_t_minus_1, CONS_i_0_t_minus_1 = None, None
+            Pi_0_t_minus_1, Ci_0_t_minus_1 = None, None
             if algo_name in algos_4_no_learning:
                 PROD_i_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, 
                                            fct_aux.AUTOMATE_INDEX_ATTRS["prod_i"]]
                 CONS_i_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, 
                                            fct_aux.AUTOMATE_INDEX_ATTRS["cons_i"]]
+                Pi_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, 
+                                           fct_aux.AUTOMATE_INDEX_ATTRS["Pi"]]
+                Ci_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, 
+                                           fct_aux.AUTOMATE_INDEX_ATTRS["Ci"]]
                 ben_M = BENs_M_T_K[:,t]
                 cst_M = CSTs_M_T_K[:,t]
             else:
@@ -873,9 +878,20 @@ def add_new_vars_2_arr(algo_name, scenario_name, gamma_version,
                                            fct_aux.AUTOMATE_INDEX_ATTRS["prod_i"]]
                 CONS_i_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1, k_stop,
                                            fct_aux.AUTOMATE_INDEX_ATTRS["cons_i"]]
+                Pi_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1,  k_stop,
+                                           fct_aux.AUTOMATE_INDEX_ATTRS["Pi"]]
+                Ci_0_t_minus_1 = arr_pl_M_T_K_vars[num_pl_i, :t+1,  k_stop,
+                                           fct_aux.AUTOMATE_INDEX_ATTRS["Ci"]]
                 ben_M = BENs_M_T_K[:,t, k_stop]
                 cst_M = CSTs_M_T_K[:,t, k_stop]
-                
+            
+            Pi_cum = np.sum(Pi_0_t_minus_1, axis=0)
+            Ci_cum = np.sum(Ci_0_t_minus_1, axis=0)
+            arr_pl_M_T_KSTOP_vars[num_pl_i, t,
+                                  AUTOMATE_INDEX_ATTRS_NEW["Picum"]] = Pi_cum
+            arr_pl_M_T_KSTOP_vars[num_pl_i, t,
+                                  AUTOMATE_INDEX_ATTRS_NEW["Cicum"]] = Ci_cum    
+            
             PROD_i = np.sum(PROD_i_0_t_minus_1, axis=0) 
             CONS_i = np.sum(CONS_i_0_t_minus_1, axis=0)
             arr_pl_M_T_KSTOP_vars[num_pl_i, t,
@@ -1778,14 +1794,17 @@ def OLD_plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate,
 def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate, 
                                    price, scenario, gamma_version):
     
-    cols = ["t", "B", "C", "BB", "CC", "RU"]
+    cols = ["t", "B", "C", "BB", "CC", "RU", "Cicum", "Picum"]
     
     df_res_t = df_al_pr_ra_sc_gam.groupby(cols[0])[cols[1:]]\
                 .agg({cols[1]:[np.mean, np.std, np.min, np.max], 
                       cols[2]:[np.mean, np.std, np.min, np.max], 
                       cols[3]:[np.mean, np.std, np.min, np.max], 
                       cols[4]:[np.mean, np.std, np.min, np.max], 
-                      cols[5]:[np.mean, np.std, np.min, np.max]})
+                      cols[5]:[np.mean, np.std, np.min, np.max], 
+                      cols[6]:[np.mean, np.std, np.min, np.max], 
+                      cols[7]:[np.mean, np.std, np.min, np.max]
+                      })
     
     df_res_t.columns = ["_".join(x) for x in df_res_t.columns.ravel()]
     df_res_t = df_res_t.reset_index()
@@ -1814,21 +1833,36 @@ def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate,
                 BB_mean=df_res_t.BB_mean.tolist(), 
                 CC_mean=df_res_t.CC_mean.tolist(), 
                 RU_mean=df_res_t.RU_mean.tolist(), 
+                
+                Picum_mean=df_res_t.Picum_mean.tolist(), 
+                Cicum_mean=df_res_t.Cicum_mean.tolist(), 
+                
                 B_std=df_res_t.B_std.tolist(), 
                 C_std=df_res_t.C_std.tolist(), 
                 BB_std=df_res_t.BB_std.tolist(), 
                 CC_std=df_res_t.CC_std.tolist(), 
                 RU_std=df_res_t.RU_std.tolist(),
+                
+                Picum_std=df_res_t.Picum_std.tolist(), 
+                Cicum_std=df_res_t.Cicum_std.tolist(), 
+                
                 B_amin=df_res_t.B_amin.tolist(), 
                 C_amin=df_res_t.C_amin.tolist(), 
                 BB_amin=df_res_t.BB_amin.tolist(), 
                 CC_amin=df_res_t.CC_amin.tolist(), 
                 RU_amin=df_res_t.RU_amin.tolist(), 
+                
+                Picum_amin=df_res_t.Picum_amin.tolist(), 
+                Cicum_amin=df_res_t.Cicum_amin.tolist(), 
+                
                 B_amax=df_res_t.B_amax.tolist(), 
                 C_amax=df_res_t.C_amax.tolist(), 
                 BB_amax=df_res_t.BB_amax.tolist(), 
                 CC_amax=df_res_t.CC_amax.tolist(), 
-                RU_amax=df_res_t.RU_amax.tolist()
+                RU_amax=df_res_t.RU_amax.tolist(), 
+                
+                Picum_amax=df_res_t.Picum_amax.tolist(), 
+                Cicum_amax=df_res_t.Cicum_amax.tolist() 
                 )
 
     print("data keys={}".format(data.keys()))
@@ -1854,6 +1888,13 @@ def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate,
     px.vbar(x=dodge('x', -0.3+4*width, range=px.x_range), top=new_cols[4], 
                     width=width, source=source, legend_label=new_cols[4], 
                     color="#FFD700")
+    
+    px.vbar(x=dodge('x', -0.3+5*width, range=px.x_range), top=new_cols[5], 
+                    width=width, source=source, legend_label=new_cols[5], 
+                    color="#bcbd22")
+    px.vbar(x=dodge('x', -0.3+6*width, range=px.x_range), top=new_cols[6], 
+                    width=width, source=source, legend_label=new_cols[6], 
+                    color="#17becf")
     
     
     # px.vbar(x=dodge('x', -0.3+0*width, range=px.x_range), top=new_cols[0], 
@@ -2098,6 +2139,269 @@ def plot_evolution_Si_by_players_over_time(
 #              evolution stocks by player over periods ---> fin
 # _____________________________________________________________________________
 
+
+# _____________________________________________________________________________
+#
+#      evolution of the number of player by situations over periods ---> debut
+# _____________________________________________________________________________
+def OLD_plot_evolution_DIFFERENCE_players_by_situation_for_time(df_al_pr_ra_sc_gam, 
+                                                 algo, rate, 
+                                                 price, scenario, 
+                                                 gamma_version):
+    """
+    plot the bar plot with key is (t, setX) (X={A,B1,B2,C})
+    identify the players that are changed the situation over the time
+    """
+    df_al_pr_ra_sc_gam["t"] = df_al_pr_ra_sc_gam["t"].astype(str)
+    setX = df_al_pr_ra_sc_gam.set.unique().tolist()
+    t_periods = df_al_pr_ra_sc_gam.t.unique().tolist()
+    
+    df = df_al_pr_ra_sc_gam.copy()
+    
+    data = {"t":t_periods}
+    for setx in setX:
+        players_t_minus_1 = list()
+        for t in t_periods:
+            mask = (df.t == t) & (df.set == setx); 
+            df_t_setx = df[mask].copy()
+            players_t = df_t_setx.pl_i.unique().tolist()
+            diff_players_t_t_minus_1 = list()
+            if t == "0":
+                diff_players_t_t_minus_1 = []
+                diff_players_t_t_minus_1\
+                    .insert(0,"nb="+str(len(diff_players_t_t_minus_1)))
+                # players_t_minus_1 = players_t
+            else:
+                diff_players_t_t_minus_1 \
+                    = set(players_t_minus_1).union(set(players_t)) - set(players_t)
+                diff_players_t_t_minus_1 = list(diff_players_t_t_minus_1)
+                diff_players_t_t_minus_1\
+                    .insert(0,"nb="+str(len(diff_players_t_t_minus_1)))
+                # players_t_minus_1 = players_t
+            if setx not in data:
+                data[setx] = [diff_players_t_t_minus_1]
+            else:
+                data[setx].append(diff_players_t_t_minus_1)
+                
+            players_t_minus_1 = players_t
+    
+    t_setX = list(it.product(t_periods, setX)) 
+    
+    tooltips = [ (setx,"@"+setx) for setx in setX]
+    tooltips.append(("t", "@t"))
+    TOOLS[7] = HoverTool(tooltips= tooltips)
+    px= figure(x_range=FactorRange(*t_setX), 
+               plot_height=350, plot_width = int(WIDTH*MULT_WIDTH),
+               title="number of players, ({}, {}, {}, rate={}, price={})".format(
+                  algo, scenario, gamma_version, rate, price),
+                toolbar_location="above", tools=TOOLS)
+    
+    source = ColumnDataSource(data=data)
+    
+    width= 0.1 #0.5
+    # px.vbar(x='x', top=new_cols[4], width=0.9, source=source, color="#c9d9d3")
+            
+    # px.vbar(x='x', top=new_cols[0], width=0.9, source=source, color="#718dbf")
+    
+    px.vbar(x='t', top=setX[0], 
+            width=width, source=source, legend_label=setX[0], 
+            color="#c9d9d3")
+    px.vbar(x='t', top=setX[1], 
+            width=width, source=source, legend_label=setX[1], 
+            color="#718dbf")
+    px.vbar(x='t', top=setX[2], 
+            width=width, source=source, legend_label=setX[2], 
+            color="#e84d60")
+    px.vbar(x='t', top=setX[3], 
+            width=width, source=source, legend_label=setX[3], 
+            color="#ddb7b1")
+    
+    px.y_range.start = 0
+    px.x_range.range_padding = 0.1
+    px.xaxis.major_label_orientation = 1
+    px.xgrid.grid_line_color = None
+    
+    return px         
+                
+def plot_evolution_DIFFERENCE_players_by_situation_for_time(df_al_pr_ra_sc_gam, 
+                                                 algo, rate, 
+                                                 price, scenario, 
+                                                 gamma_version):
+    """
+    plot the bar plot with key is (t, setX) (X={A,B1,B2,C})
+    identify the players that are changed the situation over the time
+    """
+    df_al_pr_ra_sc_gam["t"] = df_al_pr_ra_sc_gam["t"].astype(str)
+    setX = df_al_pr_ra_sc_gam.set.unique().tolist()
+    t_periods = df_al_pr_ra_sc_gam.t.unique().tolist()
+    
+    df = df_al_pr_ra_sc_gam.copy()
+    
+    data = {"t":t_periods}
+    for setx in setX:
+        players_t_minus_1 = list()
+        for t in t_periods:
+            mask = (df.t == t) & (df.set == setx); 
+            df_t_setx = df[mask].copy()
+            players_t = df_t_setx.pl_i.unique().tolist()
+            diff_players_t_t_minus_1 = list()
+            if t == "0":
+                diff_players_t_t_minus_1 = []
+            else:
+                diff_players_t_t_minus_1 \
+                    = set(players_t_minus_1).union(set(players_t)) - set(players_t)
+                diff_players_t_t_minus_1 = list(diff_players_t_t_minus_1)
+
+            if setx not in data:
+                data[setx] = [len(diff_players_t_t_minus_1)]
+                data[setx+"Players"] = [diff_players_t_t_minus_1]
+            else:
+                data[setx].append(len(diff_players_t_t_minus_1))
+                data[setx+"Players"].append(diff_players_t_t_minus_1)
+                
+            players_t_minus_1 = players_t
+    
+    t_setX = list(it.product(t_periods, setX)) 
+    
+    tooltips = list()
+    for setx in setX:
+        tooltips.append((setx,"@"+setx))
+        tooltips.append((setx+"Players","@"+setx+"Players"))
+    tooltips.append(("t", "@t"))
+    TOOLS[7] = HoverTool(tooltips= tooltips)
+    px= figure(x_range=FactorRange(*t_setX), 
+               plot_height=350, plot_width = int(WIDTH*MULT_WIDTH),
+               title="number of players, ({}, {}, {}, rate={}, price={})".format(
+                  algo, scenario, gamma_version, rate, price),
+                toolbar_location="above", tools=TOOLS)
+    
+    source = ColumnDataSource(data=data)
+    
+    width= 1.0 #0.1 #0.5
+    # px.vbar(x='x', top=new_cols[4], width=0.9, source=source, color="#c9d9d3")
+            
+    colors = ["#c9d9d3", "#718dbf", "#e84d60", "#ddb7b1"]
+    for i, setx in enumerate(setX):
+        # px.vbar(x='t', top=setX[i], 
+        #     width=width, source=source, legend_label=setX[i], 
+        #     color=colors[i])
+        px.vbar(x=dodge('t', i*width, range=px.x_range), top=setX[i], 
+                width=width, source=source, legend_label=setX[i], 
+                color=colors[i])
+    
+    px.y_range.start = 0
+    #px.x_range.range_padding = 0.1
+    px.xaxis.major_label_orientation = 1
+    px.xgrid.grid_line_color = None
+    
+    return px         
+                
+
+def plot_evolution_players_by_situation_for_time(df_al_pr_ra_sc_gam, 
+                                                 algo, rate, 
+                                                 price, scenario, 
+                                                 gamma_version):
+    """
+    plot the bar plot with key is (t, setX) (X={A,B1,B2,C})
+    """
+    cols = ["t", "set"]
+    df_set = df_al_pr_ra_sc_gam.groupby(cols)[["set"]].count()
+    df_set.rename(columns={"set":"nb_players"}, inplace=True)
+    df_set = df_set.reset_index()
+    df_set["t"] = df_set["t"].astype(str)
+    
+    x = list(map(tuple,list(df_set[cols].values)))
+    nb_players = list(df_set["nb_players"])
+    
+    TOOLS[7] = HoverTool(tooltips=[
+                            ("nb_players", "@nb_players")
+                            ]
+                        )
+    px= figure(x_range=FactorRange(*x), 
+               plot_height=350, plot_width = int(WIDTH*MULT_WIDTH),
+               title="number of players, ({}, {}, {}, rate={}, price={})".format(
+                  algo, scenario, gamma_version, rate, price),
+                toolbar_location=None, tools=TOOLS)
+    
+
+    data = dict(x=x, nb_players=nb_players)
+    
+    source = ColumnDataSource(data=data)
+    px.vbar(x='x', top='nb_players', width=0.9, source=source, 
+            fill_color=factor_cmap('x', 
+                                   palette=Category20[20], 
+                                   factors=list(df_set["t"].unique()), 
+                                   start=0, end=1))
+    
+    px.y_range.start = 0
+    px.x_range.range_padding = 0.1
+    px.xaxis.major_label_orientation = 1
+    px.xgrid.grid_line_color = None
+    
+    return px
+    
+
+def plot_evolution_players_by_situation_over_time(
+            df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+            algos=["LRI1"], 
+            dico_SelectGammaVersion={"DETERMINIST": [1],"LRI1": [1],"LRI2": [0]}):
+    """
+    evolution of the number of player by situations over periods
+    """
+    df = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T.copy()
+    df["pl_i"] = df.pl_i.astype(str)
+    df["t"] = df.t.astype(str)
+    
+    rates = df.rate.unique(); rates = rates[rates!=0].tolist()
+    prices = df.prices.unique().tolist()
+    scenarios = df.scenario.unique().tolist()
+    gamma_version_root = "".join(list(df.gamma_version.unique()[0])[:-1])
+    
+    dico_pxs = dict()
+    for algo, price, rate, scenario in it.product(algos, prices, 
+                                                  rates, scenarios):
+        gamma_versions = dico_SelectGammaVersion[algo]
+        for gamma_version_number in gamma_versions:
+            gamma_version = gamma_version_root+str(gamma_version_number)
+            mask_al_pr_ra_sc_gam = ((df.rate == str(rate)) | (df.rate == 0)) \
+                                    & (df.prices == price) \
+                                    & (df.algo == algo) \
+                                    & (df.scenario == scenario) \
+                                    & (df.gamma_version == gamma_version)
+            df_al_pr_ra_sc_gam = df[mask_al_pr_ra_sc_gam].copy()
+            
+            print("{}, {}, {}, df_al_pr_ra_sc_gam={}".format(algo, 
+                    scenario, gamma_version, df_al_pr_ra_sc_gam.shape ))
+            # pxs_al_pr_ra_sc_gam = plot_evolution_players_by_situation_for_time(
+            #                         df_al_pr_ra_sc_gam, algo, rate, 
+            #                         price, scenario, gamma_version)
+            pxs_al_pr_ra_sc_gam = plot_evolution_DIFFERENCE_players_by_situation_for_time(
+                                    df_al_pr_ra_sc_gam, algo, rate, 
+                                    price, scenario, gamma_version)
+            pxs_al_pr_ra_sc_gam.legend.click_policy="hide"
+            
+            if (algo, price, rate, scenario, gamma_version) not in dico_pxs.keys():
+                dico_pxs[(algo, price, rate, scenario, gamma_version)] \
+                    = [pxs_al_pr_ra_sc_gam]
+            else:
+                dico_pxs[(algo, price, rate, scenario, gamma_version)]\
+                    .append(pxs_al_pr_ra_sc_gam)
+        
+    rows_evol_situations = list()
+    for key, pxs_al_pr_ra_sc_gam in dico_pxs.items():
+        col_px_sts = column(pxs_al_pr_ra_sc_gam)
+        rows_evol_situations.append(col_px_sts)
+    rows_evol_situations = column(children=rows_evol_situations, 
+                                  sizing_mode='stretch_both')
+    
+    return rows_evol_situations
+    
+    pass
+# _____________________________________________________________________________
+#
+#      evolution of the number of player by situations over periods ---> fin
+# _____________________________________________________________________________
+
 # _____________________________________________________________________________
 #
 #                   affichage  dans tab  ---> debut
@@ -2112,7 +2416,7 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
         df_B_C_BB_CC_RU_M[col] = df_B_C_BB_CC_RU_M[col].astype(float)
     
     cols = ["PROD", "CONS", "b0", "c0", "pi_sg_plus","pi_sg_minus", 
-            "B", "C", "BB", "CC", "RU"]
+            "B", "C", "BB", "CC", "RU", "Cicum", "Picum"]
     for col in cols:
         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col] \
             = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col].astype(float)
@@ -2150,6 +2454,15 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
                                 title="evolution C B CC BB RU over time")
     print("evolution of gains : TERMINEE")
     
+    rows_evol_situations = plot_evolution_players_by_situation_over_time(
+                        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        algos=algos_to_show, 
+                        dico_SelectGammaVersion=dico_SelectGammaVersion
+                    )
+    tabs_evol_situation_over_time = Panel(child=rows_evol_situations, 
+                                title="evolution of situation over time")
+    print("evolution of Situation  : TERMINEE")
+    
     rows_evol_Si = plot_evolution_Si_by_players_over_time(
                         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
                         algos=algos_to_show, 
@@ -2165,6 +2478,7 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
                         tab_compGammaVersionAllScenario, 
                         tab_dists_ts,
                         tabs_evol_over_time, 
+                        tabs_evol_situation_over_time,
                         tabs_evol_Si_over_time
                         ])
     NAME_RESULT_SHOW_VARS 
@@ -2269,18 +2583,29 @@ def DBG_group_plot_on_panel(df_B_C_BB_CC_RU_M,
     #                             title="evolution C B CC BB RU over time")
     # print("evolution of gains : TERMINEE")
     
-    rows_evol_Si = plot_evolution_Si_by_players_over_time(
+    # rows_evol_Si = plot_evolution_Si_by_players_over_time(
+    #                     df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+    #                     algos=algos_to_show, 
+    #                     dico_SelectGammaVersion=dico_SelectGammaVersion
+    #                 )
+    # tabs_evol_Si_over_time = Panel(child=rows_evol_Si, 
+    #                             title="evolution of stocks over time")
+    # print("evolution of Stocks Si : TERMINEE")
+    
+    rows_evol_situations = plot_evolution_players_by_situation_over_time(
                         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
                         algos=algos_to_show, 
                         dico_SelectGammaVersion=dico_SelectGammaVersion
                     )
-    tabs_evol_Si_over_time = Panel(child=rows_evol_Si, 
-                                title="evolution of stocks over time")
-    print("evolution of Stocks Si : TERMINEE")
+    tabs_evol_situation_over_time = Panel(child=rows_evol_situations, 
+                                title="evolution of situation over time")
+    print("evolution of Situation  : TERMINEE")
+    
     
     tabs = Tabs(tabs= [ 
                         #tabs_evol_over_time,
-                        tabs_evol_Si_over_time
+                        #tabs_evol_Si_over_time,
+                        tabs_evol_situation_over_time
                         ])
     #NAME_RESULT_SHOW_VARS 
     name_result_show_vars = "comparaison_RU_BCBBCC_gammaVersionV1.html"
@@ -2305,14 +2630,18 @@ if __name__ == "__main__":
     ti = time.time()
     
     k_steps = 250
-    phi_name = "A1B1" # A1B1, A2B2, A1B0, A2B8
+    phi_name = "A1.2B0.8" #"A1B1" # A1B1, A1.2B0.8
+    automate = "Automate2" # Automate1=Ancien automate, Automate2= nouveau automate du 04/05/2021
         
     # name_dir = os.path.join("tests", 
     #                         "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
-    t_periods = 50#20#50
+    # A1B1Automate2gamma_V0_V1_V2_V3_V4_T50_ksteps250_setACsetAB1B2C
+    t_periods = 50 #20#50
     k_steps = 250 #5
-    name_dir = os.path.join("tests", 
-                            phi_name+"gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
+    name_dir = os.path.join(
+                "tests", 
+                phi_name + automate \
+                    +"gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
     
     nb_sub_dir = len(name_dir.split(os.sep))
     
