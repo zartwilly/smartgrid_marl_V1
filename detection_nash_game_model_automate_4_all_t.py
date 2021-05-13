@@ -271,9 +271,7 @@ def nash_balanced_player_game(arr_pl_M_T_vars_init,
                                                          else pi_sg_plus_t
             pi_sg_minus_t_minus_1 = pi_sg_minus_t0_minus_1 if t == 0 \
                                                             else pi_sg_minus_t
-            # pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus/pi_hp_minus, 
-            #                     fct_aux.N_DECIMALS)
-            # pi_0_minus_t = pi_sg_minus_t_minus_1
+            
             q_t_minus, q_t_plus = fct_aux.compute_upper_bound_quantity_energy(
                                     arr_pl_M_T_vars_modif, t)
             phi_hp_minus_t = fct_aux.compute_cost_energy_bought_by_SG_2_HP(
@@ -290,8 +288,13 @@ def nash_balanced_player_game(arr_pl_M_T_vars_init,
             pi_hp_plus_t = round(phi_hp_plus_t/q_t_plus, fct_aux.N_DECIMALS) \
                             if q_t_plus != 0 \
                             else 0
-            pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus_t/pi_hp_minus_t, 
-                                fct_aux.N_DECIMALS)
+                            
+            pi_0_plus_t = None
+            if pi_hp_minus_t > 0:
+                pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus_t/pi_hp_minus_t, 
+                                    fct_aux.N_DECIMALS)
+            else:
+                pi_0_plus_t = 0
             pi_0_minus_t = pi_sg_minus_t_minus_1
             if t == 0:
                pi_0_plus_t = fct_aux.PI_0_PLUS_INIT #4

@@ -1331,10 +1331,13 @@ def bf_balanced_player_game(arr_pl_M_T_vars_init,
             print("q_t-={}, phi_hp-={}, pi_hp-={}, pi_sg-_t-1={}, ".format(q_t_minus, phi_hp_minus_t, pi_hp_minus_t, pi_sg_minus_t_minus_1))
             print("q_t+={}, phi_hp+={}, pi_hp+={}, pi_sg+_t-1={}".format(q_t_plus, phi_hp_plus_t, pi_hp_plus_t, pi_sg_plus_t_minus_1))
             
-            pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus_t/pi_hp_minus_t, 
-                                fct_aux.N_DECIMALS) \
-                            if t > 0 \
-                            else fct_aux.PI_0_PLUS_INIT #4
+            pi_0_plus_t = None
+            if pi_hp_minus_t > 0:
+                pi_0_plus_t = round(pi_sg_minus_t_minus_1*pi_hp_plus_t/pi_hp_minus_t, 
+                                    fct_aux.N_DECIMALS)
+            else:
+                pi_0_plus_t = 0
+            pi_0_plus_t =  pi_0_plus_t if t > 0 else fct_aux.PI_0_PLUS_INIT #4
                                 
             pi_0_minus_t = pi_sg_minus_t_minus_1 \
                             if t > 0 \

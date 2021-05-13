@@ -217,7 +217,7 @@ if __name__ == "__main__":
         date_hhmm = "DDMM_HHMM"
         t_periods = 50 #20 #50 #10 #30 #50 #30 #35 #55 #117 #15 #3
         k_steps = 250 #250 #5 #100 #250 #5000 #2000 #50 #250
-        NB_REPEAT_K_MAX= 1#10 #3 #15 #30
+        NB_REPEAT_K_MAX= 10 #3 #15 #30
         learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
         fct_aux.N_DECIMALS = 8
         
@@ -412,7 +412,7 @@ if __name__ == "__main__":
                 +" execution Termine !!!! "
     subject = "Execution scenarios ."
     
-    envoie_mail(message, subject)
+    #envoie_mail(message, subject)
     #envoie_mail_with_pieces_jointes(message, subject, path_files)
     
     import pandas as pd
