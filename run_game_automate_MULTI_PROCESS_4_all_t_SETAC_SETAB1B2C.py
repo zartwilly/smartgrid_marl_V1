@@ -83,7 +83,7 @@ if __name__ == "__main__":
     
     
     # _____                     scenarios --> debut                 __________
-    doc_VALUES = 17; # 15: doc version 15, 16: doc version 16, 17: doc version 17
+    doc_VALUES = 18; # 15: doc version 15, 16: doc version 16, 17: doc version 17, 18: doc version 18 only scenario1
     dico_scenario = None
     root_doc_VALUES = None
     if doc_VALUES == 15:
@@ -178,6 +178,40 @@ if __name__ == "__main__":
         dico_scenario = {"scenario0": scenario0,
                          "scenario1": scenario1, 
                          "scenario2": scenario2}
+        
+    elif doc_VALUES == 18:
+        
+        setA_m_players_12 = 8; setB1_m_players_12 = 5; 
+        setB2_m_players_12 = 5; setC_m_players_12 = 8;                         # 26 players
+        setA_m_players_0 = 10; setC_m_players_0 = 10;                          # 20 players
+            
+        prob_A_A = 0.6; prob_A_C = 0.4;
+        prob_C_A = 0.4; prob_C_C = 0.6;
+        scenario0 = [(prob_A_A, prob_A_C), 
+                    (prob_C_A, prob_C_C)] 
+        
+        prob_A_A = 0.5; prob_A_B1 = 0.5; prob_A_B2 = 0.0; prob_A_C = 0.0;
+        prob_B1_A = 0.5; prob_B1_B1 = 0.5; prob_B1_B2 = 0.0; prob_B1_C = 0.0;
+        prob_B2_A = 0.0; prob_B2_B1 = 0.0; prob_B2_B2 = 0.5; prob_B2_C = 0.5;
+        prob_C_A = 0.0; prob_C_B1 = 0.0; prob_C_B2 = 0.5; prob_C_C = 0.5 
+        scenario1 = [(prob_A_A, prob_A_B1, prob_A_B2, prob_A_C), 
+                     (prob_B1_A, prob_B1_B1, prob_B1_B2, prob_B1_C),
+                     (prob_B2_A, prob_B2_B1, prob_B2_B2, prob_B2_C),
+                     (prob_C_A, prob_C_B1, prob_C_B2, prob_C_C)]
+        
+        prob_A_A = 0.2; prob_A_B1 = 0.8; prob_A_B2 = 0.0; prob_A_C = 0.0;
+        prob_B1_A = 0.8; prob_B1_B1 = 0.2; prob_B1_B2 = 0.0; prob_B1_C = 0.0;
+        prob_B2_A = 0.0; prob_B2_B1 = 0.0; prob_B2_B2 = 0.2; prob_B2_C = 0.8;
+        prob_C_A = 0.0; prob_C_B1 = 0.0; prob_C_B2 = 0.8; prob_C_C = 0.2
+        scenario2 = [(prob_A_A, prob_A_B1, prob_A_B2, prob_A_C), 
+                     (prob_B1_A, prob_B1_B1, prob_B1_B2, prob_B1_C),
+                     (prob_B2_A, prob_B2_B1, prob_B2_B2, prob_B2_C),
+                     (prob_C_A, prob_C_B1, prob_C_B2, prob_C_C)]
+        
+        root_doc_VALUES = "Doc{}".format(doc_VALUES)
+        scenario_names = {"scenario1"}
+        dico_scenario = {"scenario1": scenario1}
+    
         
     # _____                     scenarios --> fin                   __________
     # _____                     gamma_version --> debut             __________
@@ -330,6 +364,28 @@ if __name__ == "__main__":
             if scenario_name in ["scenario1", "scenario2"]:
                 arr_pl_M_T_vars_init \
                     = fct_aux.get_or_create_instance_Pi_Ci_etat_AUTOMATE_SETAB1B2C_doc17(
+                                setA_m_players_12, setB1_m_players_12, 
+                                setB2_m_players_12, setC_m_players_12, 
+                                t_periods, 
+                                dico_scenario[scenario_name],
+                                scenario_name,
+                                path_to_arr_pl_M_T, used_instances)
+                dico_012[scenario_name] = arr_pl_M_T_vars_init
+            else:
+                arr_pl_M_T_vars_init \
+                    = fct_aux.get_or_create_instance_Pi_Ci_etat_AUTOMATE_SETAC(
+                            setA_m_players_0, setC_m_players_0, 
+                            t_periods, 
+                            dico_scenario[scenario_name],
+                            scenario_name,
+                            path_to_arr_pl_M_T, used_instances)
+                dico_012[scenario_name] = arr_pl_M_T_vars_init
+    elif doc_VALUES==18:
+        for scenario_name, scenario in dico_scenario.items():
+            print("scenario_name={}, scenario={}".format(scenario_name, dico_scenario[scenario_name]))
+            if scenario_name in ["scenario1", "scenario2"]:
+                arr_pl_M_T_vars_init \
+                    = fct_aux.get_or_create_instance_Pi_Ci_etat_AUTOMATE_SETAB1B2C_doc18(
                                 setA_m_players_12, setB1_m_players_12, 
                                 setB2_m_players_12, setC_m_players_12, 
                                 t_periods, 
