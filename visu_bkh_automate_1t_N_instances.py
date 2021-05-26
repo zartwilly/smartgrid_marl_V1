@@ -943,9 +943,9 @@ def group_plot_on_panel(df_arr_M_T_Ks, df_ben_cst_M_T_K,
                         path_2_best_learning_steps, 
                         NAME_RESULT_SHOW_VARS):
     
-    # cols_mean_Perf_ts = plot_Perf_t_players_all_algos(df_ben_cst_M_T_K, t)
-    # tab_mean_ts = Panel(child=cols_mean_Perf_ts, title="Average of Perf_t")
-    # print("Average of Perf_t: TERMINEE")
+    cols_mean_Perf_ts = plot_Perf_t_players_all_algos(df_ben_cst_M_T_K, t)
+    tab_mean_ts = Panel(child=cols_mean_Perf_ts, title="Average of Perf_t")
+    print("Average of Perf_t: TERMINEE")
     
     global MULT_WIDTH
     global MULT_HEIGHT
@@ -982,7 +982,7 @@ def group_plot_on_panel(df_arr_M_T_Ks, df_ben_cst_M_T_K,
     tabs = Tabs(tabs= [ 
                         tab_meanVi_algo_instance_state,
                         tab_meanVi_algo_state,   
-                        #tab_mean_ts,
+                        tab_mean_ts,
                         # tab_RU_CONS_PROD_ts,
                         # tab_pls_CONS_PROD_ts,
                         ])
@@ -1004,6 +1004,9 @@ if __name__ == "__main__":
     algos_4_showing=["DETERMINIST", "LRI1", "LRI2"] \
                     + fct_aux.ALGO_NAMES_BF \
                     + fct_aux.ALGO_NAMES_NASH
+    algos_4_showing=["DETERMINIST", "LRI1", "LRI2"] \
+                    + [fct_aux.ALGO_NAMES_BF[0]] \
+                    + [fct_aux.ALGO_NAMES_NASH[0]]
     algos_4_no_learning=["DETERMINIST","RD-DETERMINIST"] \
                          + fct_aux.ALGO_NAMES_BF \
                          + fct_aux.ALGO_NAMES_NASH
@@ -1011,6 +1014,13 @@ if __name__ == "__main__":
     name_dir = "tests"
     name_dir_oneperiod = os.path.join(name_dir,"OnePeriod_50instances")
     name_dir_oneperiod = os.path.join(name_dir,"OnePeriod_50instancesGammaV4")
+    
+    phi_name = "A1B1"#"A1.2B0.8"#"A1B1"  # "A1.2B0.8", "A1B1"
+    name_dir = "tests"; sub1_name_dir = "OnePeriod_50instances"; gamma_version = "gammaV-1"
+    name_dir_oneperiod = os.path.join(
+                            name_dir,
+                            phi_name+sub1_name_dir, 
+                            sub1_name_dir+gamma_version)
     
     tuple_paths, \
     prices_new, \
