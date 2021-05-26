@@ -1306,7 +1306,7 @@ def OLD_plot_gamma_version_RU(df_ra_pr, rate, price, scenario):
     
     title = "comparison Gamma_version ({},rate:{}, price={})".format(scenario, rate, price)
     px.title.text = title
-    px.y_range.start = df_res.RU_mean.min() - 1
+    px.y_range.start = df_res.RU_mean.min() - 1 if df_res.RU_mean.min() < 0 else 0
     px.x_range.range_padding = width
     px.xgrid.grid_line_color = None
     px.legend.location = "top_right" #"top_left"
@@ -1380,7 +1380,7 @@ def plot_gamma_version_RU(df_ra_pr, rate, price, scenario):
     
     title = "comparison Gamma_version ({},rate:{}, price={})".format(scenario, rate, price)
     px.title.text = title
-    px.y_range.start = df_res.RU_mean.min() - 1
+    px.y_range.start = df_res.RU_mean.min() - 1 if df_res.RU_mean.min() < 0 else 0
     px.x_range.range_padding = width
     px.xgrid.grid_line_color = None
     px.legend.location = "top_right" #"top_left"
@@ -1509,7 +1509,7 @@ def plot_gamma_version_all_scenarios(df_ra_pr, rate, price):
     
     title = "comparison Gamma_version (rate:{}, price={})".format(rate, price)
     px.title.text = title
-    px.y_range.start = df_res.RU_mean.min() - 1
+    px.y_range.start = df_res.RU_mean.min() - 1 if df_res.RU_mean.min() < 0 else 0
     px.x_range.range_padding = width
     px.xgrid.grid_line_color = None
     px.legend.location = "top_right" #"top_left"
@@ -1780,7 +1780,7 @@ def OLD_plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate,
     title = "gain evolution over time ({}, {}, rate:{}, price={}, gamma_version={})".format(
                 algo, scenario, rate, price, gamma_version)
     px.title.text = title
-    px.y_range.start = df_res_t.RU_mean.min() - 1
+    px.y_range.start = df_res_t.RU_mean.min() - 1 if df_res_t.RU_mean.min() < 0 else 0
     px.x_range.range_padding = width
     px.xgrid.grid_line_color = None
     px.legend.location = "top_right" #"top_left"
@@ -1916,7 +1916,7 @@ def plot_evolution_prices_for_time(df_al_pr_ra_sc_gam, algo, rate,
     title = "gain evolution over time ({}, {}, rate:{}, price={}, gamma_version={})".format(
                 algo, scenario, rate, price, gamma_version)
     px.title.text = title
-    px.y_range.start = df_res_t.RU_mean.min() - 1
+    px.y_range.start = df_res_t.RU_mean.min() - 1 if df_res_t.RU_mean.min() < 0 else 0
     px.x_range.range_padding = width
     px.xgrid.grid_line_color = None
     px.legend.location = "top_right" #"top_left"
@@ -2073,7 +2073,7 @@ def plot_evolution_stocks_by_players_for_time(df_al_pr_ra_sc_gam, algo, rate,
     title = "evolution of stock by players over time ({}, {}, {}, rate={}, price={})".format(
             algo, scenario, gamma_version, rate, price)
     px.title.text = title
-    px.y_range.start = df_pl_t.Si.min() - 1
+    px.y_range.start = df_pl_t.Si.min() - 1 if df_pl_t.Si.min() < 0 else 0
     px.x_range.range_padding = 0.1#WIDTH
     px.xgrid.grid_line_color = None
     px.legend.location = "top_right" #"top_left"
@@ -2630,18 +2630,26 @@ if __name__ == "__main__":
     ti = time.time()
     
     k_steps = 250
-    phi_name = "A1.2B0.8" #"A1B1" # A1B1, A1.2B0.8
-    automate = "Automate2" # Automate1=Ancien automate, Automate2= nouveau automate du 04/05/2021
+    phi_name = "A1B1" #"A1B1" #"A1.2B0.8" #"A1B1" # A1B1, A1.2B0.8
+    automate = "Doc18" # Doc18 ,Doc17, Doc16, Doc15
         
     # name_dir = os.path.join("tests", 
     #                         "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
-    # A1B1Automate2gamma_V0_V1_V2_V3_V4_T50_ksteps250_setACsetAB1B2C
+    # A1B1Doc17gamma_V0_V1_V2_V3_V4_T50_ksteps250_setACsetAB1B2C
     t_periods = 50 #20#50
     k_steps = 250 #5
     name_dir = os.path.join(
                 "tests", 
                 phi_name + automate \
                     +"gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
+    # A1B1Doc17gamma_V0_V1_T50_ksteps250_setACsetAB1B2C
+    t_periods = 50 #20#50
+    k_steps = 250 #5
+    name_dir = os.path.join(
+                "tests", 
+                phi_name + automate \
+                    +"gamma_V0_V1_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")    
+        
     
     nb_sub_dir = len(name_dir.split(os.sep))
     
@@ -2692,7 +2700,7 @@ if __name__ == "__main__":
             round(df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T.memory_usage().sum()/(1024*1024), 2)))
     
    
-    algos_to_show= ["LRI1", "DETERMINIST", "LRI2"];
+    algos_to_show= list(dico_SelectGammaVersion.keys()) # ["LRI1", "DETERMINIST", "LRI2"];
     gamma_versions_to_show=[];
     scenarios_to_show=[];
    
