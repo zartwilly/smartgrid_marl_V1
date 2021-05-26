@@ -480,8 +480,54 @@ def balanced_player_game_t(arr_M_k_vars, arr_M_k_minus_1_vars, k,
 #_____________________________________________________________________________
 #             update p_i_j_k players at t and k --> debut       
 #_____________________________________________________________________________
-def algo_utility_version1(arr_M_k_vars, arr_bg_i_nb_repeat_k,
-                          learning_rate, 
+def mode_2_update_pl_i(arr_M_k_vars, num_pl_i):
+    """
+    return the mode to update either S1 or S2
+    """
+    state_i = arr_M_k_vars[num_pl_i, INDEX_ATTRS["state_i"]]
+    mode_i = arr_M_k_vars[num_pl_i, INDEX_ATTRS["mode_i"]]
+    S1or2, S1or2_bar = None, None
+    if state_i == "state1" and mode_i == fct_aux.STATE1_STRATS[0]:
+        S1or2 = "S1"; S1or2_bar = "S2"
+    elif state_i == "state1" and mode_i == fct_aux.STATE1_STRATS[1]:
+        S1or2 = "S2"; S1or2_bar = "S1"
+    elif state_i == "state2" and mode_i == fct_aux.STATE2_STRATS[0]:
+        S1or2 = "S1"; S1or2_bar = "S2"
+    elif state_i == "state2" and mode_i == fct_aux.STATE2_STRATS[1]:
+        S1or2 = "S2"; S1or2_bar = "S1"
+    elif state_i == "state3" and mode_i == fct_aux.STATE3_STRATS[0]:
+        S1or2 = "S1"; S1or2_bar = "S2"
+    elif state_i == "state3" and mode_i == fct_aux.STATE3_STRATS[1]:
+        S1or2 = "S2"; S1or2_bar = "S1"
+        
+    return S1or2, S1or2_bar
+
+def update_S1_S2_p_i_j_k(arr_M_k_vars, u_is_k, learning_rate):
+    """
+    update S1_p_i_j_k and S2_p_i_j_k for all players
+    
+    p_i_j_k_minus_1 is the proba at k because we update p_i_j_k at k 
+    by p_i_j_k_minus_1 at the end of step k-1
+    """
+    m_players = arr_M_k_vars.shape[0]
+    for num_pl_i in range(0, m_players):
+        S1or2, S1or2_bar = None, None
+        S1or2, S1or2_bar = mode_2_update_pl_i(arr_M_k_vars=arr_M_k_vars, 
+                                              num_pl_i=num_pl_i)
+        
+        p_i_j_k_minus_1 = arr_M_k_vars[num_pl_i, INDEX_ATTRS[S1or2+"_p_i_j_k"]]
+        
+        p_i_j_k = p_i_j_k_minus_1 \
+                    + learning_rate * u_is_k[num_pl_i] * (1 - p_i_j_k_minus_1)
+        arr_M_k_vars[num_pl_i, INDEX_ATTRS[S1or2+"_p_i_j_k"]] = p_i_j_k
+        
+        p_i_j_k_bar = 1 - p_i_j_k
+        arr_M_k_vars[num_pl_i, INDEX_ATTRS[S1or2_bar+"_p_i_j_k"]] = p_i_j_k_bar
+        
+    return arr_M_k_vars
+    
+
+def algo_utility_version1(arr_M_k_vars, learning_rate, 
                           bg_min_M_0_k_minus_2, bg_max_M_0_k_minus_2, 
                           nb_repeat_k, dbg):
     """
@@ -510,9 +556,9 @@ def algo_utility_version1(arr_M_k_vars, arr_bg_i_nb_repeat_k,
                     - arr_M_k_vars[num_pl_i, INDEX_ATTRS["ben_i"]] + stock_max
     
     # checkout players' bg_min, bg_max from k=0 to k
-    bg_k = arr_M_k_vars[num_pl_i, INDEX_ATTRS["bg_i"]] 
-    bg_max_M_0_k_minus_1 = np.maximum(bg_max_M_0_k_minus_2, bg_k)
-    bg_min_M_0_k_minus_1 = np.minimum(bg_min_M_0_k_minus_2, bg_k)
+    bg_is = arr_M_k_vars[:, INDEX_ATTRS["bg_i"]] 
+    bg_max_M_0_k_minus_1 = np.maximum(bg_max_M_0_k_minus_2, bg_is)             # bg_max_M_0_k_minus_1: (M_PLAYERS,)
+    bg_min_M_0_k_minus_1 = np.minimum(bg_min_M_0_k_minus_2, bg_is)             # bg_min_M_0_k_minus_1: (M_PLAYERS,)
     
     # True in comp_min_max_bg MEANS bg_min=bg_max and num_pli doesn't play
     comp_min_max_bg = np.isclose(bg_min_M_0_k_minus_1,
@@ -529,15 +575,181 @@ def algo_utility_version1(arr_M_k_vars, arr_bg_i_nb_repeat_k,
         
         return arr_M_k_vars, bool_bg_i_min_eq_max
     
-    # TODO STOP HERE FOR IDENTIFY THE ROLE OF arr_bg_i_nb_repeat_k
+    # compute u_i_k
+    u_is_k = np.empty(shape=(m_players,)); u_is_k.fill(np.nan)
+    for num_pl_i in range(0, m_players):
+        num_frac = bg_max_M_0_k_minus_1[num_pl_i] - bg_is[num_pl_i]
+        den_frac = bg_max_M_0_k_minus_1[num_pl_i] - bg_min_M_0_k_minus_1[num_pl_i]
+        state_i = arr_M_k_vars[num_pl_i, INDEX_ATTRS["state_i"]]
+        if state_i == fct_aux.STATES[2]:
+            u_is_k[num_pl_i] = 1 - num_frac/den_frac if den_frac != 0 else 0
+        else:
+            u_is_k[num_pl_i] = num_frac/den_frac if den_frac != 0 else 0
+            
+    # update p_i_j_k for strategies S1, S2
+    arr_M_k_vars = update_S1_S2_p_i_j_k(arr_M_k_vars=arr_M_k_vars.copy(), 
+                                        u_is_k=u_is_k, 
+                                        learning_rate=learning_rate)
+    
+    arr_M_k_vars[:, INDEX_ATTRS["u_i"]] = u_is_k
+    bool_bg_i_min_eq_max = False
+    
+    return arr_M_k_vars, bool_bg_i_min_eq_max
+            
                               
+def algo_utility_version2(arr_M_k_vars, learning_rate, 
+                          bg_min_M_0_k_minus_2, bg_max_M_0_k_minus_2, 
+                          nb_repeat_k, dbg):
+    """
+    compute the utility of players following the version 2 in the document
+    
+    arr_M_k_vars: shape M_PLAYERS * len(INDEX_ATTRS)
+    arr_bg_i_nb_repeat_k: shape M_PLAYERS * fct_aux.NB_REPEAT_K_MAX
+    
+    """    
+    m_players = arr_M_k_vars.shape[0]
+    
+    # I_m, I_M
+    P_i_t_s = arr_M_k_vars[
+                arr_M_k_vars[:,INDEX_ATTRS["state_i"]] == fct_aux.STATES[2]
+                ][:,INDEX_ATTRS["Pi"]]
+    C_i_t_s = arr_M_k_vars[
+                arr_M_k_vars[:,INDEX_ATTRS["state_i"]] == fct_aux.STATES[2]
+                ][:,INDEX_ATTRS["Ci"]]
+    S_i_t_s = arr_M_k_vars[
+                arr_M_k_vars[:,INDEX_ATTRS["state_i"]] == fct_aux.STATES[2]
+                ][:,INDEX_ATTRS["Si"]]
+    Si_max_t_s = arr_M_k_vars[
+                    arr_M_k_vars[:,INDEX_ATTRS["state_i"]] == fct_aux.STATES[2]
+                    ][:,INDEX_ATTRS["Si_max"]]
+    ## I_m
+    P_C_S_i_t_s = P_i_t_s - (C_i_t_s + (Si_max_t_s - S_i_t_s))
+    P_C_S_i_t_s[P_C_S_i_t_s < 0] = 0
+    I_m = np.sum(P_C_S_i_t_s, axis=0) 
+    ## I_M
+    P_C_i_t_s = P_i_t_s - C_i_t_s
+    I_M = np.sum(P_C_i_t_s, axis=0)
+    
+    # O_m, O_M
+    ## O_m
+    P_i_t_s = arr_M_k_vars[
+                (arr_M_k_vars[:,INDEX_ATTRS["state_i"]] == fct_aux.STATES[0]) 
+                ][:, INDEX_ATTRS["Pi"]]
+    C_i_t_s = arr_M_k_vars[
+                (arr_M_k_vars[:,INDEX_ATTRS["state_i"]] == fct_aux.STATES[0]) 
+                ][:, INDEX_ATTRS["Ci"]]
+    S_i_t_s = arr_M_k_vars[
+                (arr_M_k_vars[:,INDEX_ATTRS["state_i"]] == fct_aux.STATES[0]) 
+                ][:, INDEX_ATTRS["Si"]]
+    C_P_S_i_t_s = C_i_t_s - (P_i_t_s + S_i_t_s)
+    O_m = np.sum(C_P_S_i_t_s, axis=0)
+    ## O_M
+    P_i_t_s = arr_M_k_vars[
+                (arr_M_k_vars[:, INDEX_ATTRS["state_i"]] == fct_aux.STATES[0]) 
+                       | 
+                (arr_M_k_vars[:, INDEX_ATTRS["state_i"]] == fct_aux.STATES[1])
+                ][:, INDEX_ATTRS["Pi"]]
+    C_i_t_s = arr_M_k_vars[
+                (arr_M_k_vars[:, INDEX_ATTRS["state_i"]] == fct_aux.STATES[0]) 
+                       | 
+                (arr_M_k_vars[:, INDEX_ATTRS["state_i"]] == fct_aux.STATES[1])
+                ][:, INDEX_ATTRS["Ci"]]
+    S_i_t_s = arr_M_k_vars[
+                (arr_M_k_vars[:, INDEX_ATTRS["state_i"]] == fct_aux.STATES[0]) 
+                       | 
+                (arr_M_k_vars[:, INDEX_ATTRS["state_i"]] == fct_aux.STATES[1])
+                ][:, INDEX_ATTRS["Si"]]
+    C_P_i_t_s = C_i_t_s - P_i_t_s
+    O_M = np.sum(C_P_i_t_s, axis=0)
+    
+    # ***** verification I_m <= IN_sg <= I_M et O_m <= OUT_sg <= O_M *****
+    IN_sg = np.sum(arr_M_k_vars[:,INDEX_ATTRS["prod_i"]], axis=0)
+    OUT_sg = np.sum(arr_M_k_vars[:,INDEX_ATTRS["cons_i"]], axis=0)
+    
+    if dbg:
+        if I_m <= IN_sg and IN_sg <= I_M:
+            print("LRI2 : I_m <= IN_sg <= I_M? ---> OK")
+            if dbg:
+               print("LRI2: I_m={} <= IN_sg={} <= I_M={} ---> OK"\
+                     .format(round(I_m,2), round(IN_sg,2), round(I_M,2))) 
+        else:
+            print("LRI2 : I_m <= IN_sg <= I_M? ---> NOK")
+            print("LRI2 : I_m={} <= IN_sg={} <= I_M={} ---> NOK"\
+                     .format(round(I_m,2), round(IN_sg,2), round(I_M,2)))
+            if dbg:
+               print("LRI2 : I_m={} <= IN_sg={} <= I_M={} ---> OK"\
+                     .format( round(I_m,2), round(IN_sg,2), round(I_M,2)))
+        if O_m <= OUT_sg and OUT_sg <= O_M:
+            print("LRI2 : O_m <= OUT_sg <= O_M? ---> OK")
+            if dbg:
+               print("LRI2 : O_m={} <= OUT_sg={} <= O_M={} ---> OK"\
+                     .format( round(O_m,2), round(OUT_sg,2), round(O_M,2))) 
+        else:
+            print("LRI2: O_m <= OUT_sg <= O_M? ---> NOK")
+            if dbg:
+               print("LRI2 : O_m={} <= OUT_sg={} <= O_M={} ---> OK"\
+                     .format( round(O_m,2), round(OUT_sg,2), round(O_M,2))) 
+                   
+    # c_0_M
+    pi_hp_minus_t = arr_M_k_vars[:, INDEX_ATTRS["pi_hp_minus_t"]]
+    pi_0_minus_t = arr_M_k_vars[:, INDEX_ATTRS["pi_0_minus_t"]]
+    frac = ( (O_M - I_m) * pi_hp_minus_t + I_M * pi_0_minus_t ) / O_m
+    c_0_M = max(frac, pi_0_minus_t)
+    c_0_M = round(c_0_M, fct_aux.N_DECIMALS)
+    
+    # bg_i
+    for num_pl_i in range(0, arr_M_k_vars.shape[0]):
+        bg_i = None
+        bg_i = arr_M_k_vars[num_pl_i, INDEX_ATTRS["ben_i"]] \
+                - arr_M_k_vars[num_pl_i, INDEX_ATTRS["cst_i"]] \
+                + (c_0_M \
+                   * fct_aux.fct_positive(
+                       arr_M_k_vars[num_pl_i, INDEX_ATTRS["Ci"]],
+                       arr_M_k_vars[num_pl_i, INDEX_ATTRS["Pi"]]
+                       ))
+        bg_i = round(bg_i, fct_aux.N_DECIMALS)
+        arr_M_k_vars[num_pl_i, INDEX_ATTRS["bg_i"]] = bg_i
+    
+    # checkout players' bg_min, bg_max from k=0 to k
+    bg_is = arr_M_k_vars[:, INDEX_ATTRS["bg_i"]] 
+    bg_max_M_0_k_minus_1 = np.maximum(bg_max_M_0_k_minus_2, bg_is)             # bg_max_M_0_k_minus_1: (M_PLAYERS,)
+    bg_min_M_0_k_minus_1 = np.minimum(bg_min_M_0_k_minus_2, bg_is)             # bg_min_M_0_k_minus_1: (M_PLAYERS,)
+    
+    # True in comp_min_max_bg MEANS bg_min=bg_max and num_pli doesn't play
+    comp_min_max_bg = np.isclose(bg_min_M_0_k_minus_1,
+                                 bg_max_M_0_k_minus_1, 
+                                 equal_nan=False,
+                                 atol=pow(10,-fct_aux.N_DECIMALS))
+    
+    arr_M_k_vars[:, INDEX_ATTRS["non_playing_players"]] \
+        = np.invert(comp_min_max_bg).astype(int)
+        
+    if comp_min_max_bg.any() == True \
+        and nb_repeat_k != fct_aux.NB_REPEAT_K_MAX:
+        bool_bg_i_min_eq_max = True
+        
+        return arr_M_k_vars, bool_bg_i_min_eq_max
+    
+    # compute u_i_k on shape (M_PLAYERS,)
+    u_is_k = np.empty(shape=(m_players,)); u_is_k.fill(np.nan)
+    for num_pl_i in range(0, m_players):
+        num_frac = bg_max_M_0_k_minus_1[num_pl_i] - bg_is[num_pl_i]
+        den_frac = bg_max_M_0_k_minus_1[num_pl_i] - bg_min_M_0_k_minus_1[num_pl_i]
+        u_is_k[num_pl_i] = 1 - num_frac/den_frac if den_frac != 0 else 0
+        
+            
+    # update p_i_j_k for strategies S1, S2
+    arr_M_k_vars = update_S1_S2_p_i_j_k(arr_M_k_vars=arr_M_k_vars.copy(), 
+                                        u_is_k=u_is_k, 
+                                        learning_rate=learning_rate)
+    
+    arr_M_k_vars[:, INDEX_ATTRS["u_i"]] = u_is_k
+    bool_bg_i_min_eq_max = False
+    
+    return arr_M_k_vars, bool_bg_i_min_eq_max
     
     
-    
-    
-
 def update_p_i_j_k_by_defined_utility_funtion(arr_M_k_vars, 
-                                              arr_bg_i_nb_repeat_k,
                                               nb_repeat_k,
                                               learning_rate, 
                                               algo_utility, 
@@ -545,20 +757,107 @@ def update_p_i_j_k_by_defined_utility_funtion(arr_M_k_vars,
                                               bg_max_M_0_k_minus_2, dbg=False):
     if algo_utility == 1:
         # version 1 of utility fonction
-        algo_utility_version1(arr_M_k_vars=arr_M_k_vars, 
-                              arr_bg_i_nb_repeat_k=arr_bg_i_nb_repeat_k,
-                              learning_rate=learning_rate, 
-                              bg_min_M_0_k_minus_2=bg_min_M_0_k_minus_2, 
-                              bg_max_M_0_k_minus_2=bg_max_M_0_k_minus_2,
-                              nb_repeat_k=nb_repeat_k,
-                              dbg=dbg)
+        arr_M_k_vars, bool_bg_i_min_eq_max \
+            = algo_utility_version1(
+                arr_M_k_vars=arr_M_k_vars.copy(), 
+                learning_rate=learning_rate, 
+                bg_min_M_0_k_minus_2=bg_min_M_0_k_minus_2, 
+                bg_max_M_0_k_minus_2=bg_max_M_0_k_minus_2,
+                nb_repeat_k=nb_repeat_k,
+                dbg=dbg)
+        return arr_M_k_vars, bool_bg_i_min_eq_max 
     elif algo_utility == 2:
-        # version 1 of utility fonction
-        #algo_utility_version2()
+        # version 2 of utility fonction
+        arr_M_k_vars, bool_bg_i_min_eq_max \
+            = algo_utility_version2(
+                arr_M_k_vars=arr_M_k_vars.copy(), 
+                learning_rate=learning_rate, 
+                bg_min_M_0_k_minus_2=bg_min_M_0_k_minus_2, 
+                bg_max_M_0_k_minus_2=bg_max_M_0_k_minus_2,
+                nb_repeat_k=nb_repeat_k,
+                dbg=dbg)
+        return arr_M_k_vars, bool_bg_i_min_eq_max 
         pass
     
 #_____________________________________________________________________________
 #             update p_i_j_k players at t and k --> fin       
+#_____________________________________________________________________________
+
+#_____________________________________________________________________________
+#    mode with the greater probability btw S1_p_i_j_k and S2_p_i_j_k: debut 
+#_____________________________________________________________________________
+def update_profile_players_by_select_mode_from_S1orS2_p_i_j_k(arr_M_K_vars,
+                                                              k_stop_learning):
+    """
+    for each player, affect the mode having the greater probability between 
+    S1_p_i_j_k and S2_p_i_j_k
+    """
+    m_players = arr_M_K_vars.shape[0]
+    for num_pl_i in range(0, m_players):
+        S1_p_i_j_k = arr_M_K_vars[num_pl_i, k_stop_learning, 
+                                  INDEX_ATTRS["S1_p_i_j_k"]]
+        S2_p_i_j_k = arr_M_K_vars[num_pl_i, k_stop_learning, 
+                                  INDEX_ATTRS["S2_p_i_j_k"]]
+        state_i = arr_M_K_vars[num_pl_i, k_stop_learning, 
+                               INDEX_ATTRS["state_i"]]
+        mode_i=None
+        if state_i == fct_aux.STATES[0] and S1_p_i_j_k >= S2_p_i_j_k:          # state1, CONS+
+            mode_i = fct_aux.STATE1_STRATS[0]
+        elif state_i == fct_aux.STATES[0] and S1_p_i_j_k < S2_p_i_j_k:         # state1, CONS-
+            mode_i = fct_aux.STATE1_STRATS[1]
+        elif state_i == fct_aux.STATES[1] and S1_p_i_j_k >= S2_p_i_j_k:        # state2, DIS
+            mode_i = fct_aux.STATE2_STRATS[0]
+        elif state_i == fct_aux.STATES[1] and S1_p_i_j_k < S2_p_i_j_k:         # state2, CONS-
+            mode_i = fct_aux.STATE2_STRATS[1]
+        elif state_i == fct_aux.STATES[2] and S1_p_i_j_k >= S2_p_i_j_k:        # state3, DIS
+            mode_i = fct_aux.STATE3_STRATS[0]
+        elif state_i == fct_aux.STATES[2] and S1_p_i_j_k < S2_p_i_j_k:         # state3, PROD
+            mode_i = fct_aux.STATE3_STRATS[1]
+            
+        arr_M_K_vars[num_pl_i, k_stop_learning, 
+                     INDEX_ATTRS["mode_i"]] = mode_i
+        
+    return arr_M_K_vars
+#_____________________________________________________________________________
+#    mode with the greater probability btw S1_p_i_j_k and S2_p_i_j_k: fin 
+#_____________________________________________________________________________
+
+#_____________________________________________________________________________
+#           looking the max and min of bg for all players  : debut
+#_____________________________________________________________________________
+def looking_bg_max_min(arr_M_K_vars, arr_bg_i_nb_repeat_k, nb_repeat_k, k):
+    """
+    looking the max and min of bg for all players
+    NB: the value of k is k-1
+    
+    arr_bg_i_nb_repeat_k: shape M_PLAYERS, NB_REPEAT_K
+    """
+    # bg_is_0_k_minus_2 = arr_M_K_vars[:, 0:k, INDEX_ATTRS["bg_i"]]
+    
+    # bg_min_M_0_k_minus_2 = np.minimum(bg_is_0_k_minus_2.min(axis=1), 
+    #                                   arr_bg_i_nb_repeat_k.min(axis=1))
+    # bg_max_M_0_k_minus_2 = np.maximum(bg_is_0_k_minus_2.max(axis=1), 
+    #                                   arr_bg_i_nb_repeat_k.max(axis=1))
+    
+    bg_is_0_k_minus_2 = arr_M_K_vars[:, 0:k, INDEX_ATTRS["bg_i"]] \
+                        if k >= 1 \
+                        else np.zeros(shape=(arr_M_K_vars.shape[0], 1))
+                        
+    bg_min_M_0_k_minus_2, bg_max_M_0_k_minus_2 = None, None
+    if nb_repeat_k == 0:
+        bg_min_M_0_k_minus_2 = bg_is_0_k_minus_2
+        bg_max_M_0_k_minus_2 = bg_is_0_k_minus_2
+    else:
+        bg_min_M_0_k_minus_2 = np.minimum(
+                                bg_is_0_k_minus_2.min(axis=1), 
+                                arr_bg_i_nb_repeat_k[:,0:nb_repeat_k].min(axis=1))
+        bg_max_M_0_k_minus_2 = np.maximum(
+                                bg_is_0_k_minus_2.max(axis=1), 
+                                arr_bg_i_nb_repeat_k[:,0:nb_repeat_k].max(axis=1))
+    
+    return bg_min_M_0_k_minus_2, bg_max_M_0_k_minus_2
+#_____________________________________________________________________________
+#           looking the max and min of bg for all players  : fin 
 #_____________________________________________________________________________
 
 ###############################################################################
@@ -602,6 +901,7 @@ def lri_learning_steps(arr_M_K_vars, arr_M_t_plus_1_vars, arr_M_t_minus_1_vars,
     
     # ____   run balanced sg for one period and all k_steps : debut   _____
     dico_gamma_players_t = dict()
+    nb_nb_max_reached_repeat_k_per_t = 0                                       # number of times you reach the max of nb_repeat_k at each step k for a period t
     bool_stop_learning = False
     k_stop_learning = 0
     nb_repeat_k = 0
@@ -626,21 +926,126 @@ def lri_learning_steps(arr_M_K_vars, arr_M_t_plus_1_vars, arr_M_t_minus_1_vars,
 
         ## looking for the max and min bg for each player
         bg_min_M_0_k_minus_2, bg_max_M_0_k_minus_2 \
-            = looking_bg_max_min(arr_M_K_vars=arr_M_K_vars, k=k-1)              # 0 to k-2= k-1 items
+            = looking_bg_max_min(arr_M_K_vars=arr_M_K_vars, 
+                                 arr_bg_i_nb_repeat_k=arr_bg_i_nb_repeat_k,
+                                 nb_repeat_k=nb_repeat_k,
+                                 k=k-1)                                        # 0 to k-2= k-1 items
         ### compute p_i_j_k of players and compute players' utility
-        update_p_i_j_k_by_defined_utility_funtion(
-                arr_M_k_vars=arr_M_k_vars, 
-                arr_bg_i_nb_repeat_k=arr_bg_i_nb_repeat_k.copy(),
-                nb_repeat_k=nb_repeat_k,
-                learning_rate=learning_rate, 
-                algo_utility=algo_utility, 
-                bg_min_M_0_k_minus_2=bg_min_M_0_k_minus_2, 
-                bg_max_M_0_k_minus_2=bg_max_M_0_k_minus_2, 
-                dbg=dbg)
+        arr_M_k_vars_modif, bool_bg_i_min_eq_max \
+            = update_p_i_j_k_by_defined_utility_funtion(
+                    arr_M_k_vars=arr_M_k_vars, 
+                    nb_repeat_k=nb_repeat_k,
+                    learning_rate=learning_rate, 
+                    algo_utility=algo_utility, 
+                    bg_min_M_0_k_minus_2=bg_min_M_0_k_minus_2, 
+                    bg_max_M_0_k_minus_2=bg_max_M_0_k_minus_2, 
+                    dbg=dbg)
+            
+        # check if you must go to step k+1 or stay to step k 
+        if bool_bg_i_min_eq_max and nb_repeat_k != fct_aux.NB_REPEAT_K_MAX:
+            k = k
+            arr_bg_i_nb_repeat_k[:, nb_repeat_k] \
+                = arr_M_k_vars_modif[:, INDEX_ATTRS["bg_i"]]
+            nb_repeat_k += 1
+            if nb_repeat_k == fct_aux.NB_REPEAT_K_MAX-1:
+                nb_nb_max_reached_repeat_k_per_t += 1                           # number of times you reach the max of nb_repeat_k at each step k for a period t
+                
+        elif bool_bg_i_min_eq_max and nb_repeat_k == fct_aux.NB_REPEAT_K_MAX:
+            
+            # put proba of NON_PLAYING_PLAYERS to values from step k-1
+            bool_playOrNot_players \
+                = arr_M_k_vars_modif[:, INDEX_ATTRS["non_playing_players"]]    # binary items
+            bool_playOrNot_players = bool_playOrNot_players.astype(bool)       # boolean items
+            non_playing_index_players = np.argwhere(
+                                            np.invert(bool_playOrNot_players)) # contains only not playing players
+            for S1or2 in ["S1","S2"]:
+                arr_M_K_vars[non_playing_index_players, k,
+                             INDEX_ATTRS[S1or2+"_p_i_j_k"]] \
+                    = arr_M_K_vars[non_playing_index_players, k-1,
+                                   INDEX_ATTRS[S1or2+"_p_i_j_k"]] \
+                        if k > 0 \
+                        else arr_M_K_vars[
+                                non_playing_index_players, k,
+                                INDEX_ATTRS[S1or2+"_p_i_j_k"]]
+    
+            # update arr_M_K_vars at step k and check if learning need to stop at step k
+            arr_M_K_vars[:,k,:] = arr_M_k_vars_modif.copy()
+            bool_stop_learning \
+                = all(
+                    (arr_M_K_vars[:, k, INDEX_ATTRS["S1_p_i_j_k"]] > 
+                                        fct_aux.STOP_LEARNING_PROBA) 
+                    | 
+                    (arr_M_K_vars[:, k, INDEX_ATTRS["S2_p_i_j_k"]] > 
+                                        fct_aux.STOP_LEARNING_PROBA)
+                    )
+            
+            # put the proba of players to values from step k to k+1
+            for S1or2 in ["S1","S2"]:
+                if k+1 < k_steps:
+                    arr_M_K_vars[:, k+1, INDEX_ATTRS[S1or2+"_p_i_j_k"]] \
+                        = arr_M_K_vars[:, k, INDEX_ATTRS[S1or2+"_p_i_j_k"]]
+            
+            # update step k to k+1
+            k = k+1
+            nb_repeat_k = 0
+            arr_bg_i_nb_repeat_k = np.empty(shape=(m_players, 
+                                                   fct_aux.NB_REPEAT_K_MAX)
+                                            )
+            arr_bg_i_nb_repeat_k.fill(np.nan)
+            
+        else:
+            # put proba of NON_PLAYING_PLAYERS to values from step k-1
+            bool_playOrNot_players \
+                = arr_M_k_vars_modif[:, INDEX_ATTRS["non_playing_players"]]    # binary items
+            bool_playOrNot_players = bool_playOrNot_players.astype(bool)       # boolean items
+            non_playing_index_players = np.argwhere(
+                                            np.invert(bool_playOrNot_players)) # contains only not playing players
+            for S1or2 in ["S1","S2"]:
+                arr_M_K_vars[non_playing_index_players, k,
+                             INDEX_ATTRS[S1or2+"_p_i_j_k"]] \
+                    = arr_M_K_vars[non_playing_index_players, k-1,
+                                   INDEX_ATTRS[S1or2+"_p_i_j_k"]] \
+                        if k > 0 \
+                        else arr_M_K_vars[
+                                non_playing_index_players, k,
+                                INDEX_ATTRS[S1or2+"_p_i_j_k"]]
+                    
+            # update arr_M_K_vars at step k and check if learning need to stop at step k
+            arr_M_K_vars[:,k,:] = arr_M_k_vars_modif.copy()
+            bool_stop_learning \
+                = all(
+                    (arr_M_K_vars[:, k, INDEX_ATTRS["S1_p_i_j_k"]] > 
+                                        fct_aux.STOP_LEARNING_PROBA) 
+                    | 
+                    (arr_M_K_vars[:, k, INDEX_ATTRS["S2_p_i_j_k"]] > 
+                                        fct_aux.STOP_LEARNING_PROBA)
+                    )
+            
+            # put the proba of players to values from step k to k+1
+            for S1or2 in ["S1","S2"]:
+                if k+1 < k_steps:
+                    arr_M_K_vars[:, k+1, INDEX_ATTRS[S1or2+"_p_i_j_k"]] \
+                        = arr_M_K_vars[:, k, INDEX_ATTRS[S1or2+"_p_i_j_k"]]
+            
+            # update step k to k+1
+            k = k+1
+            nb_repeat_k = 0
+            arr_bg_i_nb_repeat_k = np.empty(shape=(m_players, 
+                                                   fct_aux.NB_REPEAT_K_MAX)
+                                            )
+            arr_bg_i_nb_repeat_k.fill(np.nan)
     
     # ____   run balanced sg for one period and all k_steps : fin     _____
-        
-    pass
+      
+    ## select modes and compute ben,cst at k_stop_learning
+    k_stop_learning = k-1 #if k < k_steps else k_steps-1
+    arr_M_K_vars_modif \
+        = update_profile_players_by_select_mode_from_S1orS2_p_i_j_k(
+            arr_M_K_vars=arr_M_K_vars.copy(), 
+            k_stop_learning=k_stop_learning)
+
+    return arr_M_K_vars_modif, k_stop_learning
+    
 # _________        learning steps of LRI algo : fin ________________________
 
 # ______________       main function of LRI   ---> debut      _________________
@@ -730,7 +1135,7 @@ def lri_balanced_player_game(arr_pl_M_T_vars_init,
                                 if t-1 >= 0 \
                                 else arr_pl_M_T_vars_init[:, t, :]
         # lri1V1
-        arr_M_K_vars_lri1V1 \
+        arr_M_K_vars_lri1V1, k_stop_learning_lri1V1 \
             = lri_learning_steps(
                 arr_M_K_vars=arr_M_K_vars.copy(), 
                 arr_M_t_plus_1_vars=arr_M_t_plus_1_vars,
@@ -749,14 +1154,27 @@ def lri_balanced_player_game(arr_pl_M_T_vars_init,
                 dbg=dbg)
             
         # lri2V0
-        arr_M_K_vars_lri1V1 \
+        arr_M_K_vars_lri2V0, k_stop_learning_lri2V0 \
             = lri_learning_steps(
                 arr_M_K_vars=arr_M_K_vars.copy(), 
+                arr_M_t_plus_1_vars=arr_M_t_plus_1_vars,
+                arr_M_t_minus_1_vars=arr_M_t_minus_1_vars,
                 algo_utility=algos_gamma[1][0], 
-                gamma_version=algos_gamma[1][1])
+                gamma_version=algos_gamma[1][1],
+                k_steps=k_steps, 
+                pi_0_plus_t=pi_0_plus_t,
+                pi_0_minus_t=pi_0_minus_t,
+                pi_hp_plus_t=pi_hp_plus_t,
+                pi_hp_minus_t=pi_hp_minus_t, 
+                pi_hp_plus=pi_hp_plus, pi_hp_minus=pi_hp_minus, 
+                a=a, b=b,
+                learning_rate=learning_rate,
+                manual_debug=manual_debug, 
+                dbg=dbg)
             
         # __ learning steps from algo utility and gamma version : fin __
         
+        # compute the best learning method at t 
         
         pass
     
