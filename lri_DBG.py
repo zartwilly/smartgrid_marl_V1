@@ -1174,9 +1174,13 @@ def lri_balanced_player_game(arr_pl_M_T_vars_init,
             
         # __ learning steps from algo utility and gamma version : fin __
         
-        # compute the best learning method at t 
-        
-        pass
+        # __ compute the best learning method at t __
+        arr_M_K_vars_best, k_stop_learning_best \
+            = choose_best_method(arr_LRI1=arr_M_K_vars_lri1V1, 
+                                 arr_LRI2=arr_M_K_vars_lri2V0)
+            
+            
+        pass # for period t
     
     
 # ______________       main function of LRI   ---> fin        _________________
