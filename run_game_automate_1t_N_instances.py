@@ -23,7 +23,7 @@ if __name__ == "__main__":
     NB_REPEAT_K_MAX= 10 #3 #15 #30
     learning_rates = [0.1]#[0.1] #[0.001]#[0.00001] #[0.01] #[0.0001]
     fct_aux.N_DECIMALS = 8
-    dico_phiname_ab = {"A1B1": {"a":1, "b":1}, "A1.2B0.9": {"a":1.2, "b":0.8}}
+    dico_phiname_ab = {"A1B1": {"a":1, "b":1}, "A1.2B0.8": {"a":1.2, "b":0.8}}
     pi_hp_plus = [10] #[10] #[0.2*pow(10,-3)] #[5, 15]
     pi_hp_minus = [30] #[20] #[0.33] #[15, 5]
     fct_aux.PI_0_PLUS_INIT = 4 #20 #4
