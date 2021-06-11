@@ -1467,12 +1467,37 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
     
     # __________         compute prices variables: debut          _____________
     B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M, \
-    B_is_M_T, C_is_M_T, BB_is_M_T, CC_is_M_T, RU_is_M_T \
+    B_is_M_T, C_is_M_T, BB_is_M_T, CC_is_M_T, RU_is_M_T, \
+    B_is_MT, C_is_MT \
         = compute_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif, 
                                         dico_k_stop_learnings,
                                         pi_sg_minus_T, pi_sg_plus_T, 
                                         pi_0_minus_T, pi_0_plus_T,
                                         b0_s_T_K, c0_s_T_K)
+    
+    R = np.sum(np.sum( B_is_MT - C_is_MT, axis=0), axis=0)
+    EB = np.sum(RU_is_M, axis=0)
+    
+    dico_EB_R_EBsetA1B1_EBsetB2C = {"EB_setA1B1":[np.nan],"EB_setB2C":[np.nan], 
+                                    "EB":[np.nan], "R":[np.nan]}
+    set_Mplayers = np.unique(arr_pl_M_T_K_vars_modif[:, 0, 0, fct_aux.AUTOMATE_INDEX_ATTRS['set']]).tolist()
+    if set(set_Mplayers).intersection(fct_aux.SET_AB1B2C) == set(fct_aux.SET_AB1B2C):
+        setA1B1, setB2C = list(), list()
+        setA1B1 \
+            = np.argwhere(
+                (arr_pl_M_T_K_vars_modif[:, 0, 0, fct_aux.AUTOMATE_INDEX_ATTRS['set']] == "setA") | 
+                (arr_pl_M_T_K_vars_modif[:, 0, 0, fct_aux.AUTOMATE_INDEX_ATTRS['set']] == "setB1")
+                ).reshape(-1).tolist()
+        setB2C \
+            = np.argwhere(
+                (arr_pl_M_T_K_vars_modif[:, 0, 0, fct_aux.AUTOMATE_INDEX_ATTRS['set']] == "setB2" ) | 
+                (arr_pl_M_T_K_vars_modif[:, 0, 0, fct_aux.AUTOMATE_INDEX_ATTRS['set']] == "setC" )
+                ).reshape(-1).tolist()
+        EB_setA1B1_det = np.sum(RU_is_M[setA1B1], axis=0)
+        EB_setB2C_det = np.sum(RU_is_M[setB2C], axis=0)
+        dico_EB_R_EBsetA1B1_EBsetB2C = {"EB_setA1B1":[EB_setA1B1_det], 
+                                         "EB_setB2C":[EB_setB2C_det], 
+                                         "EB":[EB], "R":[R]}
     
     # __________         compute prices variables: fin            _____________
     
@@ -1491,6 +1516,7 @@ def lri_balanced_player_game_all_pijk_upper_08(arr_pl_M_T_vars_init,
             BENs_M_T_K=BENs_M_T_K, CSTs_M_T_K=CSTs_M_T_K, 
             BB_is_M=BB_is_M, CC_is_M=CC_is_M, RU_is_M=RU_is_M, 
             BB_is_M_T=BB_is_M_T, CC_is_M_T=CC_is_M_T, RU_is_M_T=RU_is_M_T,
+            dico_EB_R_EBsetA1B1_EBsetB2C=dico_EB_R_EBsetA1B1_EBsetB2C,
             pi_sg_minus_T_K=pi_sg_minus_T, pi_sg_plus_T_K=pi_sg_plus_T, 
             pi_0_minus_T_K=pi_0_minus_T, pi_0_plus_T_K=pi_0_plus_T,
             pi_hp_plus_T=pi_hp_plus_T, pi_hp_minus_T=pi_hp_minus_T, 
@@ -1584,7 +1610,8 @@ def compute_prices_B_C_BB_CC_RU_LRI(arr_pl_M_T_K_vars_modif,
     RU_is_M = RU_is_MT[:, t_periods-1]
     
     return B_is_M, C_is_M, BB_is_M, CC_is_M, RU_is_M, \
-           B_is_MT_cum, C_is_MT_cum, BB_is_MT, CC_is_MT, RU_is_MT
+           B_is_MT_cum, C_is_MT_cum, BB_is_MT, CC_is_MT, RU_is_MT, \
+           B_is_MT, C_is_MT 
 # _____             compute prices B C BB CC RU ---> fin                 _____
 
 
@@ -1703,6 +1730,7 @@ def test_lri_balanced_player_game_all_pijk_upper_08_Pi_Ci_NEW_AUTOMATE():
     scenario1 = [(prob_A_A, prob_A_B, prob_A_C), 
                  (prob_B_A, prob_B_B, prob_B_C),
                  (prob_C_A, prob_C_B, prob_C_C)]
+    scenario_name = "scenario1"
     
     t_periods = 3#4
     setA_m_players, setB_m_players, setC_m_players = 10, 6, 5
@@ -1711,11 +1739,76 @@ def test_lri_balanced_player_game_all_pijk_upper_08_Pi_Ci_NEW_AUTOMATE():
     used_instances = False #False #True
     
     arr_pl_M_T_vars_init = fct_aux.get_or_create_instance_Pi_Ci_etat_AUTOMATE(
-                            setA_m_players, setB_m_players, setC_m_players, 
-                            t_periods, 
-                            scenario1,
-                            path_to_arr_pl_M_T, used_instances)
+                            setA_m_players=setA_m_players, 
+                            setB_m_players=setB_m_players, 
+                            setC_m_players=setC_m_players, 
+                            t_periods=t_periods, 
+                            scenario=scenario1,
+                            scenario_name=scenario_name,
+                            path_to_arr_pl_M_T=path_to_arr_pl_M_T, 
+                            used_instances=used_instances)
     fct_aux.checkout_values_Pi_Ci_arr_pl(arr_pl_M_T_vars_init)
+    # return arr_pl_M_T_vars_init
+    name_simu = "LRI"+str(utility_function_version)+"_simu_"+datetime.now().strftime("%d%m_%H%M")
+    path_to_save = os.path.join("tests", name_simu)
+    
+    arr_pl_M_T_K_vars_modif = lri_balanced_player_game_all_pijk_upper_08(
+                                arr_pl_M_T_vars_init,
+                                pi_hp_plus=pi_hp_plus, 
+                                pi_hp_minus=pi_hp_minus,
+                                a=a, b=b,
+                                gamma_version=gamma_version,
+                                k_steps=k_steps, 
+                                learning_rate=learning_rate,
+                                p_i_j_ks=p_i_j_ks,
+                                utility_function_version=utility_function_version,
+                                path_to_save=path_to_save, 
+                                manual_debug=manual_debug, 
+                                dbg=False)
+    return arr_pl_M_T_K_vars_modif  
+
+def test_lri_balanced_player_game_all_pijk_upper_08_Pi_Ci_scenario1_NEW_AUTOMATE():
+    # steps of learning
+    k_steps = 250 # 5,250
+    p_i_j_ks = [0.5, 0.5, 0.5]
+    
+    a = 1; b = 1; #a = 3; b = 5
+    pi_hp_plus = 10 #0.2*pow(10,-3)
+    pi_hp_minus = 20 # 0.33
+    learning_rate = 0.1
+    utility_function_version= 2 #2 #1,2
+    
+    manual_debug = False #True #False #True
+    gamma_version = 4 #2 #1 #3: gamma_i_min #4: square_root
+    fct_aux.N_DECIMALS = 2
+    
+    prob_A_A = 0.5; prob_A_B1 = 0.5; prob_A_B2 = 0.0; prob_A_C = 0.0;
+    prob_B1_A = 0.5; prob_B1_B1 = 0.5; prob_B1_B2 = 0.0; prob_B1_C = 0.0;
+    prob_B2_A = 0.0; prob_B2_B1 = 0.0; prob_B2_B2 = 0.5; prob_B2_C = 0.5;
+    prob_C_A = 0.0; prob_C_B1 = 0.0; prob_C_B2 = 0.5; prob_C_C = 0.5 
+    scenario1 = [(prob_A_A, prob_A_B1, prob_A_B2, prob_A_C), 
+                     (prob_B1_A, prob_B1_B1, prob_B1_B2, prob_B1_C),
+                     (prob_B2_A, prob_B2_B1, prob_B2_B2, prob_B2_C),
+                     (prob_C_A, prob_C_B1, prob_C_B2, prob_C_C)]
+    scenario_name = "scenario1"
+    
+    
+    t_periods = 3#4
+    setA_m_players_12 = 10; setB1_m_players_12 = 3; 
+    setB2_m_players_12 = 5; setC_m_players_12 = 8;                              # 26 joueurs
+    path_to_arr_pl_M_T = os.path.join(*["tests", "AUTOMATE_INSTANCES_GAMES"])
+    used_instances = False 
+    arr_pl_M_T_vars_init \
+        = fct_aux.get_or_create_instance_Pi_Ci_etat_AUTOMATE_SETAB1B2C_doc19(
+                    setA_m_players_12, setB1_m_players_12, 
+                    setB2_m_players_12, setC_m_players_12, 
+                    t_periods, 
+                    scenario1,
+                    scenario_name,
+                    path_to_arr_pl_M_T, used_instances)
+    fct_aux.checkout_values_Pi_Ci_arr_pl_SETAB1B2C_doc19(arr_pl_M_T_vars_init, 
+                                                         scenario_name)
+    
     # return arr_pl_M_T_vars_init
     name_simu = "LRI"+str(utility_function_version)+"_simu_"+datetime.now().strftime("%d%m_%H%M")
     path_to_save = os.path.join("tests", name_simu)
@@ -1742,7 +1835,10 @@ def test_lri_balanced_player_game_all_pijk_upper_08_Pi_Ci_NEW_AUTOMATE():
 if __name__ == "__main__":
     ti = time.time()
     
+    # arr_pl_M_T_K_vars_modif \
+    #     = test_lri_balanced_player_game_all_pijk_upper_08_Pi_Ci_NEW_AUTOMATE()
+        
     arr_pl_M_T_K_vars_modif \
-        = test_lri_balanced_player_game_all_pijk_upper_08_Pi_Ci_NEW_AUTOMATE()
+        = test_lri_balanced_player_game_all_pijk_upper_08_Pi_Ci_scenario1_NEW_AUTOMATE()
     
     print("runtime = {}".format(time.time() - ti))

@@ -785,6 +785,66 @@ def get_array_turn_df_for_t(tuple_paths, df_LRI_12_stop,
 
 # _____________________________________________________________________________ 
 #               
+#        get df_EB_R_EBsetA1B1_EBsetB2C dataframe and merge all --> debut
+# _____________________________________________________________________________ 
+def get_df_EB_R_EBsetA1B1_EBsetB2C_merge_all(tuple_paths, 
+                                             scenarios=["scenario1", 
+                                                        "scenario2"]):
+    """
+    merge various excel dataframes EB_R_EBsetA1B1_EBsetB2C
+    """
+    dico_res_scen1, dico_res_scen2 = dict(), dict()
+    name_file = "EB_R_EBsetA1B1_EBsetB2C.xlsx"
+    for tuple_path in tuple_paths:
+        path_file = os.path.join(*tuple_path)
+        df = pd.read_excel(os.path.join(path_file, name_file), index_col=0)
+        algo=None
+        if len(tuple_path) == 6:
+            algo = tuple_path[-2]
+        elif len(tuple_path) == 5:
+            algo = tuple_path[-1]
+        scenario = tuple_path[2].split("_")[-2]
+        if scenario == "scenario1":
+            dico = df.loc[:,"values"].to_dict()
+            dico["algo"] = algo
+            dico["scenario"] = scenario
+            dico_res_scen1[algo] = dico
+        elif scenario == "scenario2":
+            dico = df.loc[:,"values"].to_dict()
+            dico["algo"] = algo
+            dico["scenario"] = scenario
+            dico_res_scen2[algo] = dico
+    
+    dico_res_scen1['tau'] = {"EB_setA1B1":np.nan, "EB_setB2C":np.nan, 
+                             "EB":np.nan, "R":np.nan, "algo":"tau", 
+                             "scenario":"scenario1"}
+    dico_res_scen2['tau'] = {"EB_setA1B1":np.nan, "EB_setB2C":np.nan, 
+                             "EB":np.nan, "R":np.nan, "algo":"tau", 
+                             "scenario":"scenario2"}
+    
+    
+    df_EB_R_EBsetA1B1_EBsetB2C_scenario1 = pd.DataFrame(dico_res_scen1).T
+    df_EB_R_EBsetA1B1_EBsetB2C_scenario2 = pd.DataFrame(dico_res_scen2).T
+    cols = ["EB_setA1B1", "EB_setB2C"]
+    for col in cols:
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario1.loc["tau",col]  \
+            = df_EB_R_EBsetA1B1_EBsetB2C_scenario1.loc["DETERMINIST",col] \
+                - df_EB_R_EBsetA1B1_EBsetB2C_scenario1.loc["LRI2",col]
+    for col in cols:
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario2.loc["tau",col]  \
+            = df_EB_R_EBsetA1B1_EBsetB2C_scenario2.loc["DETERMINIST",col] \
+                - df_EB_R_EBsetA1B1_EBsetB2C_scenario2.loc["LRI2",col]
+    
+    return df_EB_R_EBsetA1B1_EBsetB2C_scenario1, \
+            df_EB_R_EBsetA1B1_EBsetB2C_scenario2
+
+# _____________________________________________________________________________ 
+#               
+#        get df_EB_R_EBsetA1B1_EBsetB2C dataframe and merge all --> fin
+# _____________________________________________________________________________ 
+
+# _____________________________________________________________________________ 
+#               
 #               add new variables to array of players  --> debut
 #                   pi_sg_{+,-}, b0, c0, B, C, BB, CC, RU 
 # _____________________________________________________________________________ 
@@ -2404,10 +2464,89 @@ def plot_evolution_players_by_situation_over_time(
 
 # _____________________________________________________________________________
 #
+#                           plot EB R TAU ---> debut
+# _____________________________________________________________________________
+def plot_bar_4_EB_R_TAU(df_scenX):
+    data = {"algo": df_scenX["algo"].values.tolist(), 
+            "EB_setA1B1": df_scenX["EB_setA1B1"].values.tolist(),
+            "EB_setB2C": df_scenX["EB_setB2C"].values.tolist(),
+            "EB": df_scenX["EB"].values.tolist(),
+            "R": df_scenX["R"].values.tolist()}
+    cols = ["EB_setA1B1", "EB_setB2C", "EB", "R"]
+    algos = df_scenX["algo"].values.tolist()
+    
+    x = [ (algo, col) for algo in algos for col in cols ]
+    counts = sum(zip(data['EB_setA1B1'], data['EB_setB2C'], data['EB'], data['R']), ()) # like an hstack
+
+    x = x[:-2]; counts = counts[:-2]
+    source = ColumnDataSource(data=dict(x=x, counts=counts))
+    
+    TOOLS[7] = HoverTool(tooltips=[
+                            ("value", "@counts")
+                            ]
+                        )
+
+    px = figure(x_range=FactorRange(*x), 
+                plot_height=350, plot_width = int(WIDTH*MULT_WIDTH),
+                toolbar_location=None, tools=TOOLS)
+    
+    width = 0.6
+    px.vbar(x='x', top='counts', width=width, source=source, line_color="white",
+            fill_color=factor_cmap('x', palette=Category20[20], 
+                                   factors=cols, start=1, end=2))
+
+    title = "{}: EB, R, Tau".format(df_scenX.scenario.unique().tolist()[0])
+    px.title.text = title
+    
+    min_val = df_scenX[['EB_setA1B1', 'EB_setB2C', 'EB', 'R']].min().min()
+    px.y_range.start = min_val-1 if  min_val < 0 else 0
+    px.x_range.range_padding = width
+    px.xgrid.grid_line_color = None
+    px.legend.location = "top_right" #"top_left"
+    px.legend.orientation = "horizontal"
+    px.xaxis.axis_label = "algo"
+    px.yaxis.axis_label = "values"
+    import math
+    px.xaxis.major_label_orientation = math.pi/6    
+    
+    return px
+
+
+    pass
+
+def plot_EB_R_TAU(df_EB_R_EBsetA1B1_EBsetB2C_scenario1, 
+                  df_EB_R_EBsetA1B1_EBsetB2C_scenario2):
+    df_scen1 = df_EB_R_EBsetA1B1_EBsetB2C_scenario1
+    df_scen2 = df_EB_R_EBsetA1B1_EBsetB2C_scenario2
+    
+    px_scen1 = plot_bar_4_EB_R_TAU(df_scen1)
+    px_scen2 = plot_bar_4_EB_R_TAU(df_scen2)
+    
+    px_scen1.legend.click_policy="hide"
+    px_scen2.legend.click_policy="hide"
+    
+    col_px_scen1 = column(px_scen1)
+    col_px_scen2 = column(px_scen2)
+    rows_EB_R_TAU = [col_px_scen1, col_px_scen2]
+    rows_EB_R_TAU = column(children=rows_EB_R_TAU, 
+                           sizing_mode='stretch_both')
+    
+    return rows_EB_R_TAU
+    
+    
+# _____________________________________________________________________________
+#
+#                           plot EB R TAU ---> fin
+# _____________________________________________________________________________
+
+# _____________________________________________________________________________
+#
 #                   affichage  dans tab  ---> debut
 # _____________________________________________________________________________
 def group_plot_on_panel(df_B_C_BB_CC_RU_M, 
                         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+                        df_EB_R_EBsetA1B1_EBsetB2C_scenario1,
+                        df_EB_R_EBsetA1B1_EBsetB2C_scenario2, 
                         algos_to_show, 
                         dico_SelectGammaVersion):
     
@@ -2421,6 +2560,13 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col] \
             = df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T[col].astype(float)
             
+            
+    cols = ["EB_setA1B1", "EB_setB2C", "EB", "R"]
+    for col in cols:
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario1[col] \
+            = df_EB_R_EBsetA1B1_EBsetB2C_scenario1[col].astype(float)
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario2[col] \
+            = df_EB_R_EBsetA1B1_EBsetB2C_scenario2[col].astype(float)
     
     
     rows_RU_C_B_CC_BB = plot_comparaison_gamma_version_all_scenarios(
@@ -2438,6 +2584,13 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
     tab_compGammaVersionBC = Panel(child=rows_B_C, 
                                     title="comparison Gamma_version B,C")
     print("comparison Gamma_version B,C : Terminee")
+    
+    rows_EB_R_TAU = plot_EB_R_TAU(df_EB_R_EBsetA1B1_EBsetB2C_scenario1, 
+                                  df_EB_R_EBsetA1B1_EBsetB2C_scenario2
+                                  )
+    tabs_EB_R_TAU = Panel(child=rows_EB_R_TAU, 
+                           title="EB R TAU")
+    print("EB R TAU : TERMINEE")
     
     rows_dists_ts = plot_distribution_by_states_4_periods(
                         df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
@@ -2476,6 +2629,7 @@ def group_plot_on_panel(df_B_C_BB_CC_RU_M,
                         tab_compGammaVersionRU,
                         tab_compGammaVersionBC, 
                         tab_compGammaVersionAllScenario, 
+                        tabs_EB_R_TAU,
                         tab_dists_ts,
                         tabs_evol_over_time, 
                         tabs_evol_situation_over_time,
@@ -2612,6 +2766,34 @@ def DBG_group_plot_on_panel(df_B_C_BB_CC_RU_M,
     output_file( os.path.join(name_dir, name_result_show_vars)  )
     #save(tabs)
     show(tabs)
+    
+def DBG_EB_R_TAU_on_panel(df_EB_R_EBsetA1B1_EBsetB2C_scenario1, \
+                          df_EB_R_EBsetA1B1_EBsetB2C_scenario2):
+    
+    cols = ["EB_setA1B1", "EB_setB2C", "EB", "R"]
+    for col in cols:
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario1[col] \
+            = df_EB_R_EBsetA1B1_EBsetB2C_scenario1[col].astype(float)
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario2[col] \
+            = df_EB_R_EBsetA1B1_EBsetB2C_scenario2[col].astype(float)
+            
+    
+    rows_EB_R_TAU = plot_EB_R_TAU(df_EB_R_EBsetA1B1_EBsetB2C_scenario1, 
+                                  df_EB_R_EBsetA1B1_EBsetB2C_scenario2
+                                  )
+    tabs_EB_R_TAU = Panel(child=rows_EB_R_TAU, 
+                           title="EB R TAU")
+    print("EB R TAU : TERMINEE")
+    
+    
+    tabs = Tabs(tabs= [ 
+                        tabs_EB_R_TAU
+                        ])
+    #NAME_RESULT_SHOW_VARS 
+    name_result_show_vars = "EB_R_TAU.html"
+    output_file( os.path.join(name_dir, name_result_show_vars)  )
+    #save(tabs)
+    show(tabs)
         
 
 # _____________________________________________________________________________
@@ -2631,7 +2813,7 @@ if __name__ == "__main__":
     
     k_steps = 250
     phi_name = "A1B1" #"A1B1" #"A1.2B0.8" #"A1B1" # A1B1, A1.2B0.8
-    automate = "Doc18" # Doc18 ,Doc17, Doc16, Doc15
+    automate = "Doc19" # Doc18 ,Doc17, Doc16, Doc15
         
     # name_dir = os.path.join("tests", 
     #                         "gamma_V0_V1_V2_V3_V4_T20_kstep250_setACsetAB1B2C")
@@ -2643,8 +2825,8 @@ if __name__ == "__main__":
                 phi_name + automate \
                     +"gamma_V0_V1_V2_V3_V4_T"+str(t_periods)+"_ksteps"+str(k_steps)+"_setACsetAB1B2C")
     # A1B1Doc17gamma_V0_V1_T50_ksteps250_setACsetAB1B2C
-    t_periods = 50 #20#50
-    k_steps = 250 #5
+    t_periods = 50 #50 #20#50
+    k_steps = 1000 #250 #5
     name_dir = os.path.join(
                 "tests", 
                 phi_name + automate \
@@ -2661,8 +2843,8 @@ if __name__ == "__main__":
                                   "LRI1": [0,1,2,3,4],
                                   "LRI2": [0,1,2,3,4]}
         dico_SelectGammaVersion={"DETERMINIST": [1], 
-                                  "LRI1": [1], 
-                                  "LRI2": [0]}
+                                  #"LRI1": [1], 
+                                  "LRI2": [1]}
         tuple_paths, path_2_best_learning_steps \
             = get_tuple_paths_of_arrays_SelectGammaVersion(
                 name_dirs=[name_dir], nb_sub_dir=nb_sub_dir,
@@ -2679,6 +2861,16 @@ if __name__ == "__main__":
                                     path_2_best_learning_steps,
                                     nb_sub_dir)
     print("get_k_stop_4_periods: TERMINE") 
+    
+    tuple_paths = list(set(tuple_paths))
+    df_EB_R_EBsetA1B1_EBsetB2C_scenario1, \
+    df_EB_R_EBsetA1B1_EBsetB2C_scenario2 \
+        = get_df_EB_R_EBsetA1B1_EBsetB2C_merge_all(
+            tuple_paths=tuple_paths, 
+            scenarios=["scenario1", "scenario2"])
+    
+    # DBG_EB_R_TAU_on_panel(df_EB_R_EBsetA1B1_EBsetB2C_scenario1, \
+    #                       df_EB_R_EBsetA1B1_EBsetB2C_scenario2)
     
     tuple_paths = list(set(tuple_paths))
     df_arr_M_T_Ks, df_ben_cst_M_T_K, \
@@ -2706,7 +2898,9 @@ if __name__ == "__main__":
    
     group_plot_on_panel(
         df_B_C_BB_CC_RU_M=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
-        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T, 
+        df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T=df_B_C_BB_CC_RU_CONS_PROD_b0_c0_pisg_M_T,
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario1=df_EB_R_EBsetA1B1_EBsetB2C_scenario1,
+        df_EB_R_EBsetA1B1_EBsetB2C_scenario2=df_EB_R_EBsetA1B1_EBsetB2C_scenario2, 
         algos_to_show=algos_to_show,
         dico_SelectGammaVersion=dico_SelectGammaVersion)
     
