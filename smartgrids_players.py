@@ -471,7 +471,7 @@ class Player:
         elif self.mode_i == "DIS" and self.state_i ==  "state2":
             self.r_i = self.Si - (self.Ci - self.Pi)
         elif self.mode_i == "DIS" and self.state_i ==  "state3":
-            self.r_i = min(self.Si_max, self.Si + self.Pi - self.Ci)
+            self.r_i = min(self.Si_max - self.Si, self.Pi - self.Ci)
         
         if self.state_i ==  "state1":                                           # Deficit
             self.prod_i = 0
