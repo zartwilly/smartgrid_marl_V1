@@ -929,22 +929,25 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
         state_is[num_pl_i] = state_i
         
         Si_t_minus, Si_t_plus = None, None
-        Xi, Yi = None, None
+        Xi, Yi, X_gamV5 = None, None, None
         if state_i == fct_aux.STATES[0]:                                       # state1 or Deficit
             Si_t_minus = 0
             Si_t_plus = Si
             Xi = pi_0_minus
             Yi = pi_hp_minus_t
+            X_gamV5 = pi_0_minus
         elif state_i == fct_aux.STATES[1]:                                     # state2 or Self
             Si_t_minus = Si - (Ci - Pi)
             Si_t_plus = Si
             Xi = pi_0_minus
             Yi = pi_hp_minus_t
+            X_gamV5 = pi_0_minus
         elif state_i == fct_aux.STATES[2]:                                     # state3 or Surplus
             Si_t_minus = Si
             Si_t_plus = max(Si_max, Si+(Pi-Ci))
             Xi = pi_0_plus
             Yi = pi_hp_plus_t
+            X_gamV5 = pi_0_plus
         Sis[num_pl_i] = Si
         GSis_t_minus[num_pl_i] = Si_t_minus
         GSis_t_plus[num_pl_i] = Si_t_plus
@@ -952,6 +955,7 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
         
         gamma_i, gamma_i_min, gamma_i_max, gamma_i_mid  = None, None, None, None
         res_mid = None
+        pi_t = None
         if manual_debug:
             gamma_i_min = fct_aux.MANUEL_DBG_GAMMA_I
             gamma_i_mid = fct_aux.MANUEL_DBG_GAMMA_I
@@ -963,6 +967,14 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
             gamma_i_max = Yi + 1
             # print("Pi={}, Ci={}, Si={}, Si_t_plus_1={}, Si_t_minus={}, Si_t_plus={}".format(Pi, 
             #         Ci, Si, Si_t_plus_1, Si_t_minus, Si_t_plus))
+            dif_pos_Ci_Pi_t_plus_1_Si_t_minus = 0
+            dif_pos_Ci_Pi_t_plus_1_Si_t_minus = fct_aux.fct_positive(Si_t_plus_1, 
+                                                                     Si_t_minus)
+            dif_Si_plus_minus = Si_t_plus - Si_t_minus
+            frac = dif_pos_Ci_Pi_t_plus_1_Si_t_minus / dif_Si_plus_minus \
+                    if dif_Si_plus_minus != 0 else 0
+            pi_t = np.sqrt(min(frac, 1))
+            
             if Si_t_plus_1 < Si_t_minus:
                 # Xi - 1
                 gamma_i = gamma_i_min
@@ -1053,6 +1065,20 @@ def compute_gamma_state_4_period_t(arr_pl_M_t_K_vars,
                                 pi_0_minus, pi_0_plus, 
                                 pi_hp_minus_t, pi_hp_plus_t, dbg)
                     
+        elif gamma_version == 5:
+            rd_draw = np.random.uniform(low=0.0, high=1.0, size=None)
+            rho_i_t = 1 if rd_draw < pi_t else 0 
+            gamma_i = rho_i_t * (X_gamV5 + 1)
+            variables = [("Si", Si), ("state_i", state_i), ("gamma_i", gamma_i), 
+                         ("Si_minus", Si_t_minus), ("Si_plus", Si_t_plus)]
+            arr_pl_M_t_K_vars = update_variables_MtK(
+                                arr_pl_M_t_K_vars, arr_pl_M_t_minus_1_K_vars, 
+                                variables, shape_arr_pl,
+                                num_pl_i, t, k, gamma_i, Si,
+                                pi_0_minus, pi_0_plus, 
+                                pi_hp_minus_t, pi_hp_plus_t, dbg)
+            
+            
     if gamma_version == 2:
         GS_t_minus = np.sum(GSis_t_minus)
         GS_t_plus = np.sum(GSis_t_plus)
